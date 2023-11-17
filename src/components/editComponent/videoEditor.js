@@ -101,8 +101,10 @@ were joined with Lord Ram.
 `;
 
   const nodes = parseSubs(srt);
+  var checkedArray = [];
+
   let timelineData = nodes.map(({ start, end, body }) => {
-    return { begin: start, end: end, text: body[0].text };
+    return { begin: start.toFixed(3), end: end.toFixed(3), text: body[0].text };
   });
 
   const videoRef = useRef();
@@ -121,7 +123,11 @@ were joined with Lord Ram.
   }
 
   const setAligns = (props) => {
-    localStorage.setItem("timelineProps", JSON.stringify(props));
+    let fixTimeProps = props.map(({ begin, end, text }) => {
+      return { begin: begin + 0.01, end: end + 0.01, text: text };
+    });
+
+    localStorage.setItem("timelineProps", JSON.stringify(fixTimeProps));
     timelineData = JSON.parse(localStorage.getItem("timelineProps"));
   };
 
@@ -149,199 +155,298 @@ were joined with Lord Ram.
   }, []);
 
   return (
-    <div>
+    <>
       <div
         style={{
-          display: "flex",
-          justifyContent: "flex-start",
-          marginLeft: "1%",
+          backgroundColor: "#1C2938",
         }}
       >
-        <h2>Video Editor for {state.videoData.vidURL}</h2>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-start",
+            marginLeft: "1%",
+          }}
+        >
+          <h2 style={{ color: "white" }}>
+            Video Editor for {state.videoData.vidURL}
+          </h2>
 
-        <Button
-          variant="contained"
-          style={{
-            backgroundColor: "darkred",
-            height: "40px",
-            marginTop: "auto",
-            marginBottom: "auto",
-            marginLeft: "1%",
-          }}
-          onClick={(e) => {
-            localStorage.removeItem("timelineProps");
-            window.location.reload();
-          }}
-        >
-          Reset Changes
-        </Button>
-        <Button
-          variant="contained"
-          style={{
-            backgroundColor: "green",
-            height: "40px",
-            marginTop: "auto",
-            marginBottom: "auto",
-            marginLeft: "1%",
-          }}
-          onClick={(e) => {
-            window.location.reload();
-          }}
-        >
-          Save Changes
-        </Button>
-      </div>
-      <Grid
-        container
-        xs={12}
-        md={12}
-        lg={12}
-        spacing={0}
-        style={{ border: "5px solid gray" }}
-      >
-        <Grid xs={6} lg={8}>
-          <div
+          <Button
+            variant="contained"
             style={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "space-between",
-              backgroundColor: "#1C2938",
+              backgroundColor: "darkred",
+              height: "40px",
+              marginTop: "auto",
+              marginBottom: "auto",
+              marginLeft: "1%",
+            }}
+            onClick={(e) => {
+              localStorage.removeItem("timelineProps");
+              localStorage.removeItem("checkedForDelete");
+              window.location.reload();
             }}
           >
-            <div style={{ width: "100%", overflow: "scroll", height: "600px" }}>
-              {(JSON.parse(localStorage.getItem("timelineProps")) === null
-                ? timelineData
-                : JSON.parse(localStorage.getItem("timelineProps"))
-              ).map((node) => {
-                return (
-                  <Timeline
-                    sx={{
-                      [`& .${timelineOppositeContentClasses.root}`]: {
-                        flex: 0.2,
-                      },
-                    }}
-                  >
-                    <TimelineItem>
-                      <TimelineOppositeContent color="textSecondary">
-                        <Stack
-                          justifyContent="flex-end"
-                          alignItems="flex-start"
-                        >
-                          <div
+            Reset Changes
+          </Button>
+          <Button
+            variant="contained"
+            style={{
+              backgroundColor: "green",
+              height: "40px",
+              marginTop: "auto",
+              marginBottom: "auto",
+              marginLeft: "1%",
+            }}
+            onClick={(e) => {
+              window.location.reload();
+            }}
+          >
+            Save Changes
+          </Button>
+
+          <Button
+            variant="contained"
+            onClick={(e) => {
+              if (
+                JSON.parse(localStorage.getItem("checkedForDelete")) === null ||
+                JSON.parse(localStorage.getItem("checkedForDelete")) === []
+              ) {
+              } else {
+                const updatedTimelineProps = JSON.parse(
+                  localStorage.getItem("timelineProps")
+                ).filter(function (value, index) {
+                  return (
+                    JSON.parse(
+                      localStorage.getItem("checkedForDelete")
+                    ).indexOf(index) == -1
+                  );
+                });
+                localStorage.removeItem("timelineProps");
+                localStorage.setItem(
+                  "timelineProps",
+                  JSON.stringify(updatedTimelineProps)
+                );
+
+                localStorage.removeItem("checkedForDelete");
+                window.location.reload();
+              }
+            }}
+            style={{
+              backgroundColor: "#1876D2",
+              height: "40px",
+              marginTop: "auto",
+              marginBottom: "auto",
+              marginLeft: "1%",
+            }}
+          >
+            Delete Checked Subtitles
+          </Button>
+
+          <Button
+            variant="contained"
+            style={{
+              backgroundColor: "#1876D2",
+              height: "40px",
+              marginTop: "auto",
+              marginBottom: "auto",
+              marginLeft: "1%",
+            }}
+          >
+            Export
+          </Button>
+        </div>
+        <Grid
+          container
+          xs={12}
+          md={12}
+          lg={12}
+          spacing={0}
+          style={{
+            borderTop: "1px solid gray",
+            borderBottom: "2px solid gray",
+          }}
+        >
+          <Grid xs={6} lg={8}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-between",
+                backgroundColor: "#1C2938",
+              }}
+            >
+              <div
+                style={{ width: "100%", overflow: "scroll", height: "600px" }}
+              >
+                {(JSON.parse(localStorage.getItem("timelineProps")) === null
+                  ? timelineData
+                  : JSON.parse(localStorage.getItem("timelineProps"))
+                ).map((node, index) => {
+                  return (
+                    <Timeline
+                      sx={{
+                        [`& .${timelineOppositeContentClasses.root}`]: {
+                          flex: 0.2,
+                        },
+                      }}
+                    >
+                      <TimelineItem style={{ height: "90px" }}>
+                        <TimelineOppositeContent color="textSecondary">
+                          <Stack
                             style={{
-                              color: "#FFF",
+                              display: "flex",
+                              alignItems: "flex-start",
+                              flexDirection: "row",
                             }}
                           >
-                            <FormControlLabel control={<Checkbox />} />
-                          </div>
-                          <div style={{ color: "#FFF" }}>
-                            {new Date(node.begin * 1000)
-                              .toISOString()
-                              .slice(12, 23)}
-                          </div>
+                            <div
+                              style={{
+                                color: "#FFF",
+                              }}
+                            >
+                              <FormControlLabel
+                                control={
+                                  <Checkbox
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        checkedArray.push(index);
+                                        localStorage.setItem(
+                                          "checkedForDelete",
+                                          JSON.stringify(checkedArray)
+                                        );
+                                      } else {
+                                        checkedArray = checkedArray.filter(
+                                          (item) => item !== index
+                                        );
 
-                          <div style={{ color: "#FFF" }}>
-                            {new Date(node.end * 1000)
-                              .toISOString()
-                              .slice(12, 23)}
-                          </div>
-                        </Stack>
-                      </TimelineOppositeContent>
-                      <TimelineSeparator>
-                        <TimelineDot />
-                        <TimelineConnector />
-                      </TimelineSeparator>
-                      <TimelineContent>
-                        <textarea
-                          style={{
-                            marginLeft: "auto",
-                            width: "100%",
-                            resize: "none",
-                            borderRadius: "5px",
-                            paddingLeft: "2%",
-                            backgroundColor: "#2C3D50",
-                            borderColor: "#34475B",
-                            color: "white",
-                          }}
-                          onChange={(e) => {
-                            console.log(e);
-                          }}
-                        >
-                          {node.text}
-                        </textarea>
-                      </TimelineContent>
-                    </TimelineItem>
-                  </Timeline>
-                );
-              })}
+                                        localStorage.setItem(
+                                          "checkedForDelete",
+                                          JSON.stringify(checkedArray)
+                                        );
+                                      }
+                                    }}
+                                  />
+                                }
+                              />
+                            </div>
+
+                            <div
+                              style={{
+                                display: "flex",
+                                flexDirection: "column",
+                              }}
+                            >
+                              <div style={{ color: "#FFF" }}>
+                                {new Date(node.begin * 1000)
+                                  .toISOString()
+                                  .slice(12, 23)}
+                              </div>
+
+                              <div style={{ color: "#FFF" }}>
+                                {new Date(node.end * 1000)
+                                  .toISOString()
+                                  .slice(12, 23)}
+                              </div>
+                            </div>
+                          </Stack>
+                        </TimelineOppositeContent>
+                        <TimelineSeparator>
+                          <TimelineDot />
+                          <TimelineConnector />
+                        </TimelineSeparator>
+                        <TimelineContent>
+                          <textarea
+                            style={{
+                              marginLeft: "auto",
+                              width: "100%",
+                              resize: "none",
+                              borderRadius: "5px",
+                              paddingLeft: "2%",
+                              backgroundColor: "#2C3D50",
+                              borderColor: "#34475B",
+                              color: "white",
+                            }}
+                            onChange={(e) => {
+                              console.log(e);
+                            }}
+                          >
+                            {node.text}
+                          </textarea>
+                        </TimelineContent>
+                      </TimelineItem>
+                    </Timeline>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          </Grid>
+          <Grid xs={6} lg={4}>
+            <Box
+              id="right-panel"
+              sx={{ fontSize: "12px", textTransform: "uppercase" }}
+            >
+              <video
+                style={{ backgroundColor: "#1C2938" }}
+                width="100%"
+                height="600px"
+                ref={videoRef}
+                src={
+                  "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+                }
+                controls
+                onPlay={() => handleTimelineChangeStart()}
+                onPause={() => handleTimelineChangePause()}
+              >
+                <track
+                  src={VTTSubs}
+                  label="English"
+                  kind="captions"
+                  srcLang="en-us"
+                  default
+                ></track>
+              </video>
+            </Box>
+          </Grid>
         </Grid>
-        <Grid xs={6} lg={4}>
-          <Box
-            id="right-panel"
-            sx={{ fontSize: "12px", textTransform: "uppercase" }}
-          >
-            <video
-              style={{ backgroundColor: "#1C2938" }}
-              width="100%"
-              height="600px"
-              ref={videoRef}
+
+        <div style={{ padding: "10px", backgroundColor: "#2C3D50" }}>
+          <div>
+            <SubtitleEditor
+              changeAreaShow={changeAreaShow}
+              changeZoomLevel={changeZoomLevel}
+              changeShift={changeShift}
+              setAligns={setAligns}
+              audioRef={timelineRef}
               src={
                 "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
               }
-              controls
-              onPlay={() => handleTimelineChangeStart()}
-              onPause={() => handleTimelineChangePause()}
-            >
-              <track
-                src={VTTSubs}
-                label="English"
-                kind="captions"
-                srclang="en-us"
-                default
-              ></track>
-            </video>
-          </Box>
-        </Grid>
-      </Grid>
-
-      <div style={{ padding: "10px", backgroundColor: "#2C3D50" }}>
-        <div>
-          <SubtitleEditor
-            changeAreaShow={changeAreaShow}
-            changeZoomLevel={changeZoomLevel}
-            changeShift={changeShift}
-            setAligns={setAligns}
-            audioRef={timelineRef}
-            src={
-              "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-            }
-            data={
-              JSON.parse(localStorage.getItem("timelineProps")) === null
-                ? timelineData
-                : JSON.parse(localStorage.getItem("timelineProps"))
-            }
-            autoScroll
-            paddingLeft={"10px"}
-            colors={{
-              background: "#2C3D50",
-              box: "#c2c9d6",
-              boxHover: "#80add6",
-              selectedBox: "#1890ff",
-              playingBox: "#f0523f",
-              text: "#212b33",
-              selectedText: "white",
-              tooltipBackground: "#474e54",
-              tooltipText: "white",
-              scrollBarBackground: "#f1f3f9",
-              scrollBar: "#c2c9d6",
-              scrollBarHover: "#5e636e",
-            }}
-          />
+              data={
+                JSON.parse(localStorage.getItem("timelineProps")) === null
+                  ? timelineData
+                  : JSON.parse(localStorage.getItem("timelineProps"))
+              }
+              autoScroll
+              paddingLeft={"10px"}
+              colors={{
+                background: "#2C3D50",
+                box: "#c2c9d6",
+                boxHover: "#80add6",
+                selectedBox: "#1890ff",
+                playingBox: "#f0523f",
+                text: "#212b33",
+                selectedText: "white",
+                tooltipBackground: "#474e54",
+                tooltipText: "white",
+                scrollBarBackground: "#f1f3f9",
+                scrollBar: "#c2c9d6",
+                scrollBarHover: "#5e636e",
+              }}
+            />
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
