@@ -20,7 +20,7 @@ import MenuItem from "@mui/material/MenuItem";
 import AdbIcon from "@mui/icons-material/Adb";
 import VideoEditor from "./components/editComponent/videoEditor";
 
-const pages = ["Home", "Users", "Videos", "Help", "Export", "Save"];
+const pages = ["Home", "Users", "Videos", "Help"];
 const settings = ["Profile", "Logout"];
 
 const App = () => {
@@ -60,14 +60,15 @@ const App = () => {
 
   return (
     <Router>
-      <AppBar position="static" color="primary">
+      <AppBar position="static" style={{ backgroundColor: "#2C3D50" }}>
         <Container maxWidth="xl">
           <Toolbar disableGutters>
             <Typography
               variant="h6"
               noWrap
-              component="a"
-              href="#app-bar-with-responsive-menu"
+              component={"a"}
+              target="_blank"
+              href="https://www.srmd.org/"
               sx={{
                 mr: 2,
                 display: { xs: "none", md: "flex" },
@@ -78,7 +79,12 @@ const App = () => {
                 textDecoration: "none",
               }}
             >
-              SRMD-LOGO
+              <img
+                style={{ width: "70px", height: "60px" }}
+                className="SRMD-img"
+                src={"/SRMD-Logo.png"}
+                alt="SRMD_Logo"
+              ></img>
             </Typography>
 
             <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
@@ -98,7 +104,7 @@ const App = () => {
             <Box sx={{ flexGrow: 0 }}>
               <Tooltip title="Open settings">
                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                  <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                  <Avatar alt="V" src="/static/images/avatar/2.jpg" />
                 </IconButton>
               </Tooltip>
               <Menu
