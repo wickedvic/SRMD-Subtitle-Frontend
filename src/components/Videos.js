@@ -18,6 +18,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { Link } from "react-router-dom";
 import { BlobServiceClient } from "@azure/storage-blob";
 import { FileUploader } from "react-drag-drop-files";
+import Swal from "sweetalert2";
 
 const Videos = () => {
   const [file, setFile] = useState(null);
@@ -37,7 +38,9 @@ const Videos = () => {
       access: "container",
     });
 
-    const blobClient = containerClient.getBlockBlobClient(file.name);
+    const blobClient = containerClient.getBlockBlobClient(
+      `${file.name}-${Date.now()}`
+    );
 
     const options = { blobHTTPHeaders: { blobContentType: file.type } };
 
@@ -134,9 +137,18 @@ const Videos = () => {
           <Button
             disabled={file === null}
             onClick={(e) => {
-              console.log("Upload");
               UploadFile(e);
               setOpen(false);
+              Swal.fire({
+                title: "File Upload Successful!",
+                text: "Your video has been uploaded!",
+                icon: "success",
+                confirmButtonText: "Close",
+              }).then((result) => {
+                if (result.isConfirmed) {
+                  setFile(null);
+                }
+              });
             }}
           >
             Upload
