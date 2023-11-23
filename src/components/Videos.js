@@ -17,9 +17,11 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Link } from "react-router-dom";
 import { BlobServiceClient } from "@azure/storage-blob";
+import { FileUploader } from "react-drag-drop-files";
 
 const Videos = () => {
   const [file, setFile] = useState(null);
+  const fileTypes = ["MP4"];
   const [open, setOpen] = useState(false);
 
   async function UploadFile() {
@@ -116,12 +118,16 @@ const Videos = () => {
             fullWidth
             variant="standard"
           />
-          <input
-            type="file"
-            onChange={(e) => {
-              setFile(e.target.files[0]);
+          <br></br>
+          <br></br>
+
+          <FileUploader
+            handleChange={(file) => {
+              setFile(file);
             }}
-          ></input>
+            name="file"
+            types={fileTypes}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
