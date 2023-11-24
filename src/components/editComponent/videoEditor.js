@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Button } from "@mui/material";
 import Stack from "@mui/material/Stack";
@@ -14,7 +14,7 @@ import TimelineDot from "@mui/lab/TimelineDot";
 import TimelineOppositeContent, {
   timelineOppositeContentClasses,
 } from "@mui/lab/TimelineOppositeContent";
-import { parseSubs, parseVtt } from "frazy-parser";
+import { parseSubs } from "frazy-parser";
 import { Grid } from "@mui/material";
 import VTTSubs from "../dummyFiles/dummyVTT.vtt";
 import SubtitleEditor from "react-subtitle-editor";
@@ -24,7 +24,7 @@ const VideoEditor = ({ props }) => {
 
   let srt = `  
 1
-0:00:00.100 --> 0:00:04.560
+0:00:00.500 --> 0:00:04.560
 Ramayana is the cultural backbone of the country.
 
 2
@@ -192,7 +192,7 @@ were joined with Lord Ram.
           <Button
             variant="contained"
             style={{
-              backgroundColor: "green",
+              backgroundColor: "darkgreen",
               height: "40px",
               marginTop: "auto",
               marginBottom: "auto",
@@ -210,7 +210,7 @@ were joined with Lord Ram.
             onClick={(e) => {
               if (
                 JSON.parse(localStorage.getItem("checkedForDelete")) === null ||
-                JSON.parse(localStorage.getItem("checkedForDelete")) === []
+                JSON.parse(localStorage.getItem("checkedForDelete")) === "[]"
               ) {
               } else {
                 const updatedTimelineProps = JSON.parse(
@@ -219,7 +219,7 @@ were joined with Lord Ram.
                   return (
                     JSON.parse(
                       localStorage.getItem("checkedForDelete")
-                    ).indexOf(index) == -1
+                    ).indexOf(index) === -1
                   );
                 });
                 localStorage.removeItem("timelineProps");

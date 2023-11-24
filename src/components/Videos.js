@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -15,11 +15,37 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import VideoEditor from "./editComponent/videoEditor";
 import { Link } from "react-router-dom";
+import { BlobServiceClient } from "@azure/storage-blob";
+import { FileUploader } from "react-drag-drop-files";
+import Swal from "sweetalert2";
 
 const Videos = () => {
-  const [open, setOpen] = React.useState(false);
+  const [file, setFile] = useState(null);
+  const fileTypes = ["MP4"];
+  const [open, setOpen] = useState(false);
+
+  async function UploadFile() {
+    let storageAccountName = "vivektesting";
+    let sasToken =
+      "sv=2022-11-02&ss=b&srt=sco&sp=rwlaciytfx&se=2023-11-23T17:00:00Z&st=2023-11-23T10:08:22Z&spr=https&sig=KAnGHDUMdQQrecKmBp0dViMrGsSRUmIVukNXyj8O%2BnA%3D";
+    const blobService = new BlobServiceClient(
+      `https://${storageAccountName}.blob.core.windows.net/?${sasToken}`
+    );
+
+    const containerClient = blobService.getContainerClient("srmd");
+    await containerClient.createIfNotExists({
+      access: "container",
+    });
+
+    const blobClient = containerClient.getBlockBlobClient(
+      `${file.name}-${Date.now()}`
+    );
+
+    const options = { blobHTTPHeaders: { blobContentType: file.type } };
+
+    await blobClient.uploadBrowserData(file, options);
+  }
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -27,6 +53,7 @@ const Videos = () => {
 
   const handleClose = () => {
     setOpen(false);
+    setFile(null);
   };
 
   function createData(vidURL, srtURL, orginalLanguage) {
@@ -94,12 +121,34 @@ const Videos = () => {
             fullWidth
             variant="standard"
           />
+          <br></br>
+          <br></br>
+
+          <FileUploader
+            handleChange={(file) => {
+              setFile(file);
+            }}
+            name="file"
+            types={fileTypes}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
           <Button
+            disabled={file === null}
             onClick={(e) => {
-              console.log("Upload");
+              UploadFile(e);
+              setOpen(false);
+              Swal.fire({
+                title: "File Upload Successful!",
+                text: "Your video has been uploaded!",
+                icon: "success",
+                confirmButtonText: "Close",
+              }).then((result) => {
+                if (result.isConfirmed) {
+                  setFile(null);
+                }
+              });
             }}
           >
             Upload
