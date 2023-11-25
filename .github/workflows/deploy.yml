@@ -5,7 +5,7 @@ name: Build and deploy Node.js app to Azure Web App - frontendsubtitletest2
 on:
   push:
     branches:
-      - main
+      - shahneha/testingDeployment1
   workflow_dispatch:
 
 jobs:
