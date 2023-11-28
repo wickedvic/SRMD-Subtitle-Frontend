@@ -1,5 +1,4 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# subtitle editor
 name: Build and deploy Node.js app to Azure Web App - frontendsubtitletest2
 
 on:
