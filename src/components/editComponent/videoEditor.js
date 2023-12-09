@@ -14,97 +14,27 @@ import TimelineDot from "@mui/lab/TimelineDot";
 import TimelineOppositeContent, {
   timelineOppositeContentClasses,
 } from "@mui/lab/TimelineOppositeContent";
-import { parseSubs } from "frazy-parser";
 import { Grid } from "@mui/material";
-import VTTSubs from "../dummyFiles/dummyVTT.vtt";
 import SubtitleEditor from "react-subtitle-editor";
+import WebVTT from "node-webvtt";
 
 const VideoEditor = ({ props }) => {
   let { state } = useLocation();
 
-  let srt = `  
-1
-0:00:00.500 --> 0:00:04.560
-Ramayana is the cultural backbone of the country.
+  const testingData = atob(state.videoData.subtitleString);
 
-2
-0:00:04.880 --> 0:00:08.240
-But let us not consider the story of Ramayana as just history.
+  // console.log("Base64 Data", testingData);
 
-3
-0:00:11.230 --> 0:00:13.720
-It has spirituality in it.
+  // console.log("Parsed Data", WebVTT.parse(testingData, { strict: false }));
 
-4
-0:00:14.330 --> 0:00:16.230
-And it starts from Navratri.
+  // const nodes = parseSubs(srt);
 
-5
-0:00:16.870 --> 0:00:20.810
-For nine days, there was a fierce battle between Ram and Ravan. 
+  const nodes = WebVTT.parse(testingData, { strict: false });
 
-6
-0:00:21.350 --> 0:00:24.130
-And on the tenth day, Ravan dies.
-
-7
-0:00:24.670 --> 0:00:25.970
-Which is called Dussehra.
-
-8
-0:00:25.970 --> 0:00:32.930
-When Shri Ram was building a bridge to go to Lanka, Who was in the army?
-
-9
-0:00:34.830 --> 0:00:35.510
-Squirrels.
-
-10
-0:00:35.790 --> 0:00:37.590
-And in front of them were demons.
-
-11
-0:00:38.210 --> 0:00:39.550
-It signifies something.
-
-12
-0:00:39.810 --> 0:00:41.510
-What is your mind like?
-
-13
-0:00:42.320 --> 0:00:42.700
-Like a monkey.
-
-14
-0:00:46.260 --> 0:00:48.160
-And on the other side, what is your mind like?
-
-15
-0:00:48.360 --> 0:00:49.040
-Like a demon.
-
-16
-0:00:49.580 --> 0:00:50.200
-The battle between the two.
-
-17
-0:00:50.200 --> 0:00:51.580
-the war between the two.
-
-18
-0:00:51.800 --> 0:00:57.040
-And all these monkeys, monkeys, crickets, etc.
-
-19
-0:00:58.300 --> 0:00:59.040
-were joined with Lord Ram.
-`;
-
-  const nodes = parseSubs(srt);
   var checkedArray = [];
 
-  let timelineData = nodes.map(({ start, end, body }) => {
-    return { begin: start.toFixed(3), end: end.toFixed(3), text: body[0].text };
+  let timelineData = nodes.cues.map(({ start, end, text }) => {
+    return { begin: start.toFixed(3), end: end.toFixed(3), text: text };
   });
 
   const videoRef = useRef();
@@ -168,9 +98,7 @@ were joined with Lord Ram.
             marginLeft: "1%",
           }}
         >
-          <h2 style={{ color: "white" }}>
-            Video Editor for {state.videoData.vidURL}
-          </h2>
+          <h2 style={{ color: "white" }}>Video Editor</h2>
 
           <Button
             variant="contained"
@@ -252,8 +180,86 @@ were joined with Lord Ram.
               marginBottom: "auto",
               marginLeft: "1%",
             }}
+            onClick={(e) => {
+              const parsedSubtitle = {
+                cues: [],
+                valid: true,
+              };
+
+              (JSON.parse(localStorage.getItem("timelineProps")) === null
+                ? timelineData
+                : JSON.parse(localStorage.getItem("timelineProps"))
+              ).forEach((subtitle, index) => {
+                const cue = {
+                  identifier: (index + 1).toString(),
+                  start: subtitle.begin,
+                  end: subtitle.end,
+                  text: subtitle.text,
+                  styles: "",
+                };
+                parsedSubtitle.cues.push(cue);
+              });
+
+              const modifiedSubtitleContent = WebVTT.compile(parsedSubtitle);
+
+              const modifiedSubtitleBlob = new Blob([modifiedSubtitleContent], {
+                type: "text/vtt",
+              });
+              const downloadLink = URL.createObjectURL(modifiedSubtitleBlob);
+              const a = document.createElement("a");
+              a.href = downloadLink;
+              a.download = "subtitles.vtt";
+              a.click();
+            }}
           >
-            Export
+            Export To VTT
+          </Button>
+
+          <Button
+            variant="contained"
+            style={{
+              backgroundColor: "#1876D2",
+              height: "40px",
+              marginTop: "auto",
+              marginBottom: "auto",
+              marginLeft: "1%",
+            }}
+            onClick={(e) => {
+              const modifiedSubtitleContent = (
+                JSON.parse(localStorage.getItem("timelineProps")) === null
+                  ? timelineData
+                  : JSON.parse(localStorage.getItem("timelineProps"))
+              ).map(({ begin, end, text }) => {
+                return {
+                  startTime: begin.toFixed(3),
+                  endTime: end.toFixed(3),
+                  text: text,
+                };
+              });
+
+              let updatedModifiedSubtitleContent = modifiedSubtitleContent.map(
+                (item, index) => ({
+                  ...item,
+                  id: index + 1,
+                })
+              );
+
+              // var srt_string = parser.toSrt(timelineData1);
+
+              const modifiedSubtitleBlob = new Blob(
+                [JSON.stringify(updatedModifiedSubtitleContent)],
+                {
+                  type: "text/srt",
+                }
+              );
+              const downloadLink = URL.createObjectURL(modifiedSubtitleBlob);
+              const a = document.createElement("a");
+              a.href = downloadLink;
+              a.download = "subtitles.srt";
+              a.click();
+            }}
+          >
+            Export To SRT
           </Button>
         </div>
         <Grid
@@ -392,14 +398,16 @@ were joined with Lord Ram.
                 height="600px"
                 ref={videoRef}
                 src={
-                  "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+                  // "https://srmdmediastorage.blob.core.windows.net/video/satsang-1702137585557.mp4"
+                  // "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+                  state.videoData.videoUrl
                 }
                 controls
                 onPlay={() => handleTimelineChangeStart()}
                 onPause={() => handleTimelineChangePause()}
               >
                 <track
-                  src={VTTSubs}
+                  src={`data:text/txt;base64,${state.videoData.subtitleString}`}
                   label="English"
                   kind="captions"
                   srcLang="en-us"
@@ -419,7 +427,9 @@ were joined with Lord Ram.
               setAligns={setAligns}
               audioRef={timelineRef}
               src={
-                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+                // "https://srmdmediastorage.blob.core.windows.net/video/satsang-1702137585557.mp4"
+                // "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+                state.videoData.videoUrl
               }
               data={
                 JSON.parse(localStorage.getItem("timelineProps")) === null

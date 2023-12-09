@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -19,32 +19,66 @@ import { Link } from "react-router-dom";
 import { BlobServiceClient } from "@azure/storage-blob";
 import { FileUploader } from "react-drag-drop-files";
 import Swal from "sweetalert2";
+import axios from "axios";
+import moment from "moment";
 
 const Videos = () => {
   const [file, setFile] = useState(null);
   const fileTypes = ["MP4"];
   const [open, setOpen] = useState(false);
+  const [rows, setRows] = useState([]);
 
   async function UploadFile() {
-    let storageAccountName = "vivektesting";
-    let sasToken =
-      "sv=2022-11-02&ss=b&srt=sco&sp=rwlaciytfx&se=2023-11-23T17:00:00Z&st=2023-11-23T10:08:22Z&spr=https&sig=KAnGHDUMdQQrecKmBp0dViMrGsSRUmIVukNXyj8O%2BnA%3D";
-    const blobService = new BlobServiceClient(
-      `https://${storageAccountName}.blob.core.windows.net/?${sasToken}`
+    const new_file = new File(
+      [file],
+      `${file.name.split(".mp4")[0]}-${Date.now()}.mp4`,
+      { type: file.type, lastModified: file.lastModified }
     );
 
-    const containerClient = blobService.getContainerClient("srmd");
-    await containerClient.createIfNotExists({
-      access: "container",
-    });
+    // console.log(file);
 
-    const blobClient = containerClient.getBlockBlobClient(
-      `${file.name}-${Date.now()}`
-    );
+    // console.log(new_file);
 
-    const options = { blobHTTPHeaders: { blobContentType: file.type } };
+    // let storageAccountName = "srmdmediastorage";
+    // let sasToken =
+    //   "sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2025-03-15T14:03:32Z&st=2023-12-09T07:03:32Z&spr=https&sig=WyQQ92Il4ugjfPpXhNSSFOb4N4Ij9%2FD%2Fx2%2BxL%2BzHh54%3D";
+    // const blobService = new BlobServiceClient(
+    //   `https://${storageAccountName}.blob.core.windows.net/?${sasToken}`
+    // );
 
-    await blobClient.uploadBrowserData(file, options);
+    // const containerClient = blobService.getContainerClient("video");
+    // await containerClient.createIfNotExists({
+    //   access: "container",
+    // });
+
+    // const blobClient = containerClient.getBlockBlobClient(new_file.name);
+
+    // const options = { blobHTTPHeaders: { blobContentType: new_file.type } };
+
+    // await blobClient.uploadBrowserData(new_file, options);
+
+    axios
+      .post("https://speechtotexteditor.azurewebsites.net/api/v1/videos", {
+        videoUrl: `https://srmdmediastorage.blob.core.windows.net/video/${new_file.name}`,
+      })
+      .then(function (response) {
+        console.log(response);
+
+        Swal.fire({
+          title: "File Upload Successful!",
+          text: "Your video has been uploaded!",
+          icon: "success",
+          confirmButtonText: "Close",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            setFile(null);
+            window.location.reload();
+          }
+        });
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
   }
 
   const handleClickOpen = () => {
@@ -56,15 +90,17 @@ const Videos = () => {
     setFile(null);
   };
 
-  function createData(vidURL, srtURL, orginalLanguage) {
-    return { vidURL, srtURL, orginalLanguage };
-  }
-
-  const rows = [
-    createData("xyz.com", "srt123.com", "English"),
-    createData("satsang123.com", "srt456.com", "Gujarati"),
-    createData("satsangxyz.com", "srtxyz.com", "English"),
-  ];
+  useEffect(() => {
+    axios
+      .get("https://speechtotexteditor.azurewebsites.net/api/v1/videos")
+      .then((response) => {
+        console.log(response.data);
+        setRows(response.data);
+      })
+      .catch((e) => {
+        console.log("ERROR", e);
+      });
+  }, []);
 
   return (
     <div>
@@ -94,36 +130,7 @@ const Videos = () => {
           <DialogContentText>
             To Add A Video Please Fill Out The Form And Click Upload
           </DialogContentText>
-          <TextField
-            required
-            autoFocus
-            margin="dense"
-            id="name"
-            label="Video URL"
-            fullWidth
-            variant="standard"
-          />
-          <TextField
-            required
-            autoFocus
-            margin="dense"
-            id="name"
-            label="English SRT URL"
-            fullWidth
-            variant="standard"
-          />
-          <TextField
-            required
-            autoFocus
-            margin="dense"
-            id="name"
-            label="Original Language"
-            fullWidth
-            variant="standard"
-          />
           <br></br>
-          <br></br>
-
           <FileUploader
             handleChange={(file) => {
               setFile(file);
@@ -139,16 +146,6 @@ const Videos = () => {
             onClick={(e) => {
               UploadFile(e);
               setOpen(false);
-              Swal.fire({
-                title: "File Upload Successful!",
-                text: "Your video has been uploaded!",
-                icon: "success",
-                confirmButtonText: "Close",
-              }).then((result) => {
-                if (result.isConfirmed) {
-                  setFile(null);
-                }
-              });
             }}
           >
             Upload
@@ -162,10 +159,13 @@ const Videos = () => {
             <TableRow>
               <TableCell style={{ fontWeight: 700 }}>Video URL</TableCell>
               <TableCell align="center" style={{ fontWeight: 700 }}>
-                English SRT File{" "}
+                Created At
               </TableCell>
               <TableCell align="center" style={{ fontWeight: 700 }}>
-                Original Language
+                Updated At
+              </TableCell>
+              <TableCell align="center" style={{ fontWeight: 700 }}>
+                Status
               </TableCell>
               <TableCell align="center" style={{ fontWeight: 700 }}>
                 Actions
@@ -175,25 +175,38 @@ const Videos = () => {
           <TableBody>
             {rows.map((row) => (
               <TableRow
-                key={row.vidURL}
+                key={row.id}
                 sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
               >
-                <TableCell align="left">{row.vidURL}</TableCell>
-                <TableCell align="center">{row.srtURL}</TableCell>
-                <TableCell align="center">{row.orginalLanguage}</TableCell>
+                <TableCell align="left">{row.videoUrl}</TableCell>
                 <TableCell align="center">
-                  <Link
-                    to="/videos/edit"
-                    state={{ videoData: row }}
-                    // to={{
-                    //   pathname: "/videos/edit",
-                    //   state: { name: "abc" },
-                    // }}
-                  >
-                    <Button>
+                  {moment(row.createdAt).format("MM/DD/YYYY hh:mm:ss A")}
+                </TableCell>
+                <TableCell align="center">
+                  {moment(row.updatedAt).format("MM/DD/YYYY hh:mm:ss A")}
+                </TableCell>
+                <TableCell align="center">{row.status}</TableCell>
+                <TableCell align="center">
+                  {row.subtitleString === "" || row.status === "PROCESSING" ? (
+                    <Button disabled={true}>
                       <EditIcon />
                     </Button>
-                  </Link>
+                  ) : (
+                    <Link
+                      to="/videos/edit"
+                      state={{ videoData: row }}
+                      onClick={(e) => {
+                        localStorage.removeItem("timelineProps");
+                        localStorage.removeItem("checkedForDelete");
+                        // window.location.href = "/videos/edit";
+                      }}
+                    >
+                      <Button>
+                        <EditIcon />
+                      </Button>
+                    </Link>
+                  )}
+
                   <Button>
                     <DeleteIcon style={{ color: "darkred" }} />
                   </Button>
