@@ -39,23 +39,23 @@ const Videos = () => {
 
     // console.log(new_file);
 
-    // let storageAccountName = "srmdmediastorage";
-    // let sasToken =
-    //   "sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2025-03-15T14:03:32Z&st=2023-12-09T07:03:32Z&spr=https&sig=WyQQ92Il4ugjfPpXhNSSFOb4N4Ij9%2FD%2Fx2%2BxL%2BzHh54%3D";
-    // const blobService = new BlobServiceClient(
-    //   `https://${storageAccountName}.blob.core.windows.net/?${sasToken}`
-    // );
+    let storageAccountName = "srmdmediastorage";
+    let sasToken =
+      "sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2025-03-15T14:03:32Z&st=2023-12-09T07:03:32Z&spr=https&sig=WyQQ92Il4ugjfPpXhNSSFOb4N4Ij9%2FD%2Fx2%2BxL%2BzHh54%3D";
+    const blobService = new BlobServiceClient(
+      `https://${storageAccountName}.blob.core.windows.net/?${sasToken}`
+    );
 
-    // const containerClient = blobService.getContainerClient("video");
-    // await containerClient.createIfNotExists({
-    //   access: "container",
-    // });
+    const containerClient = blobService.getContainerClient("video");
+    await containerClient.createIfNotExists({
+      access: "container",
+    });
 
-    // const blobClient = containerClient.getBlockBlobClient(new_file.name);
+    const blobClient = containerClient.getBlockBlobClient(new_file.name);
 
-    // const options = { blobHTTPHeaders: { blobContentType: new_file.type } };
+    const options = { blobHTTPHeaders: { blobContentType: new_file.type } };
 
-    // await blobClient.uploadBrowserData(new_file, options);
+    await blobClient.uploadBrowserData(new_file, options);
 
     axios
       .post("https://speechtotexteditor.azurewebsites.net/api/v1/videos", {
