@@ -68,6 +68,9 @@ const VideoEditor = ({ props }) => {
           handleTimelineChangePause();
         }
         break;
+
+      default:
+      // do nothing
     }
   };
 
