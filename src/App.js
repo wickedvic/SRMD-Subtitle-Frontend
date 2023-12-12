@@ -5,7 +5,6 @@ import {
   Routes,
   Navigate,
 } from "react-router-dom";
-import Home from "./components/Home";
 import Users from "./components/Users";
 import Videos from "./components/Videos";
 import Help from "./components/Help";
@@ -26,7 +25,7 @@ import Login from "./components/Login";
 import { Backdrop, CircularProgress } from "@mui/material";
 import Register from "./components/Register";
 
-const pages = ["Home", "Users", "Videos", "Help"];
+const pages = ["Videos", "Users", "Help"];
 const settings = ["Logout"];
 
 const App = () => {
@@ -41,10 +40,6 @@ const App = () => {
   };
 
   const handleCloseNavMenu = (e) => {
-    if (e === "Home") {
-      window.location.href = "/";
-    }
-
     if (e === "Users") {
       window.location.href = "/users";
     }
@@ -245,11 +240,13 @@ const App = () => {
               </Container>
             </AppBar>
             <Routes>
-              <Route exact path="/" element={<Home />} />
+              <Route path="/" element={<Videos />} />
               <Route exact path="/users" element={<Users />} />
               <Route exact path="/videos" element={<Videos />} />
               <Route exact path="/videos/edit" element={<VideoEditor />} />
               <Route exact path="/help" element={<Help />} />
+
+              <Route path="*" element={<Navigate to="/videos" />} />
             </Routes>
           </>
         )}

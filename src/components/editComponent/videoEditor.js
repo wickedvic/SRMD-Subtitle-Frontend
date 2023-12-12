@@ -1,6 +1,6 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { Button } from "@mui/material";
+import { Backdrop, Button, CircularProgress } from "@mui/material";
 import Stack from "@mui/material/Stack";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
@@ -17,19 +17,21 @@ import TimelineOppositeContent, {
 import { Grid } from "@mui/material";
 import SubtitleEditor from "react-subtitle-editor";
 import WebVTT from "node-webvtt";
+import Swal from "sweetalert2";
+import axios from "axios";
 
 const VideoEditor = ({ props }) => {
   let { state } = useLocation();
+  const [loading, setLoading] = useState(false);
+  const subtitleData = atob(state.videoData.subtitleString);
 
-  const testingData = atob(state.videoData.subtitleString);
+  // console.log("Base64 Data", subtitleData);
 
-  // console.log("Base64 Data", testingData);
-
-  // console.log("Parsed Data", WebVTT.parse(testingData, { strict: false }));
+  // console.log("Parsed Data", WebVTT.parse(subtitleData, { strict: false }));
 
   // const nodes = parseSubs(srt);
 
-  const nodes = WebVTT.parse(testingData, { strict: false });
+  const nodes = WebVTT.parse(subtitleData, { strict: false });
 
   var checkedArray = [];
 
@@ -42,15 +44,32 @@ const VideoEditor = ({ props }) => {
 
   function handleTimelineChangeStart(e) {
     videoRef.current.currentTime = timelineRef.current.currentTime;
+
     timelineRef.current.play();
     videoRef.current.play();
   }
 
   function handleTimelineChangePause(e) {
     videoRef.current.currentTime = timelineRef.current.currentTime;
+
     timelineRef.current.pause();
     videoRef.current.pause();
   }
+
+  document.onkeydown = function (event) {
+    var video = document.getElementById("v-5417");
+
+    switch (event.keyCode) {
+      case 32:
+        event.preventDefault();
+        if (video.paused) {
+          handleTimelineChangeStart();
+        } else {
+          handleTimelineChangePause();
+        }
+        break;
+    }
+  };
 
   const setAligns = (props) => {
     let fixTimeProps = props.map(({ begin, end, text }) => {
@@ -86,6 +105,16 @@ const VideoEditor = ({ props }) => {
 
   return (
     <>
+      <Backdrop
+        sx={{
+          color: "#FFF",
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+        }}
+        open={loading}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
+
       <div
         style={{
           backgroundColor: "#1C2938",
@@ -127,7 +156,53 @@ const VideoEditor = ({ props }) => {
               marginLeft: "1%",
             }}
             onClick={(e) => {
-              window.location.reload();
+              setLoading(true);
+              // console.log(atob(state.videoData.subtitleString));
+              const parsedSubtitle = {
+                cues: [],
+                valid: true,
+              };
+              (JSON.parse(localStorage.getItem("timelineProps")) === null
+                ? timelineData
+                : JSON.parse(localStorage.getItem("timelineProps"))
+              ).forEach((subtitle, index) => {
+                const cue = {
+                  identifier: "",
+                  start: subtitle.begin,
+                  end: subtitle.end,
+                  text: subtitle.text,
+                  styles: "line:13 position:50% align:center size:80%",
+                };
+                parsedSubtitle.cues.push(cue);
+              });
+
+              const modifiedSubtitleContent = WebVTT.compile(parsedSubtitle);
+
+              axios
+                .put(
+                  `https://speechtotexteditor.azurewebsites.net/api/v1/videos/${state.videoData.id}`,
+                  {
+                    subtitleString: btoa(modifiedSubtitleContent),
+                  }
+                )
+                .then(function (response) {
+                  // console.log(response.data);
+                  setLoading(false);
+
+                  Swal.fire({
+                    title: "Success!",
+                    text: "Your changes have been saved!",
+                    icon: "success",
+                    confirmButtonText: "Close",
+                  }).then((result) => {
+                    if (result.isConfirmed) {
+                      window.location.reload();
+                    }
+                  });
+                })
+                .catch(function (error) {
+                  console.log(error);
+                });
             }}
           >
             Save Changes
@@ -141,8 +216,10 @@ const VideoEditor = ({ props }) => {
                 JSON.parse(localStorage.getItem("checkedForDelete")) === "[]"
               ) {
               } else {
-                const updatedTimelineProps = JSON.parse(
-                  localStorage.getItem("timelineProps")
+                const updatedTimelineProps = (
+                  JSON.parse(localStorage.getItem("timelineProps")) === null
+                    ? timelineData
+                    : JSON.parse(localStorage.getItem("timelineProps"))
                 ).filter(function (value, index) {
                   return (
                     JSON.parse(
@@ -343,13 +420,13 @@ const VideoEditor = ({ props }) => {
                                 flexDirection: "column",
                               }}
                             >
-                              <div style={{ color: "#FFF" }}>
+                              <div style={{ color: "#FFF" }} id="startTime">
                                 {new Date(node.begin * 1000)
                                   .toISOString()
                                   .slice(12, 23)}
                               </div>
 
-                              <div style={{ color: "#FFF" }}>
+                              <div style={{ color: "#FFF" }} id="endTime">
                                 {new Date(node.end * 1000)
                                   .toISOString()
                                   .slice(12, 23)}
@@ -374,7 +451,26 @@ const VideoEditor = ({ props }) => {
                               color: "white",
                             }}
                             onChange={(e) => {
-                              console.log(e);
+                              const updateTextData =
+                                JSON.parse(
+                                  localStorage.getItem("timelineProps")
+                                ) === null
+                                  ? timelineData
+                                  : JSON.parse(
+                                      localStorage.getItem("timelineProps")
+                                    );
+
+                              updateTextData[index].text = e.target.value;
+                              // localStorage.removeItem("timelineProps");
+
+                              setTimeout(
+                                () =>
+                                  localStorage.setItem(
+                                    "timelineProps",
+                                    JSON.stringify(updateTextData)
+                                  ),
+                                1000
+                              );
                             }}
                           >
                             {node.text}
@@ -393,15 +489,12 @@ const VideoEditor = ({ props }) => {
               sx={{ fontSize: "12px", textTransform: "uppercase" }}
             >
               <video
+                id="v-5417"
                 style={{ backgroundColor: "#1C2938" }}
                 width="100%"
                 height="600px"
                 ref={videoRef}
-                src={
-                  // "https://srmdmediastorage.blob.core.windows.net/video/satsang-1702137585557.mp4"
-                  // "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-                  state.videoData.videoUrl
-                }
+                src={state.videoData.videoUrl}
                 controls
                 onPlay={() => handleTimelineChangeStart()}
                 onPause={() => handleTimelineChangePause()}
@@ -426,11 +519,7 @@ const VideoEditor = ({ props }) => {
               changeShift={changeShift}
               setAligns={setAligns}
               audioRef={timelineRef}
-              src={
-                // "https://srmdmediastorage.blob.core.windows.net/video/satsang-1702137585557.mp4"
-                // "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-                state.videoData.videoUrl
-              }
+              src={state.videoData.videoUrl}
               data={
                 JSON.parse(localStorage.getItem("timelineProps")) === null
                   ? timelineData
