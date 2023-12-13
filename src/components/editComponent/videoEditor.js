@@ -60,7 +60,7 @@ const VideoEditor = ({ props }) => {
     var video = document.getElementById("v-5417");
 
     switch (event.keyCode) {
-      case 32:
+      case 16:
         event.preventDefault();
         if (video.paused) {
           handleTimelineChangeStart();

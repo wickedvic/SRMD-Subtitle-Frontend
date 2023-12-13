@@ -33,18 +33,10 @@ const Users = () => {
     {
       header: "Last Name",
       accessorKey: "lastName",
-      Cell: ({ cell }) => {
-        const props = cell.row.original;
-        return <>{moment(props.createdAt).format("MM/DD/YYYY hh:mm:ss A")}</>;
-      },
     },
     {
       header: "Email",
       accessorKey: "email",
-      Cell: ({ cell }) => {
-        const props = cell.row.original;
-        return <>{moment(props.updatedAt).format("MM/DD/YYYY hh:mm:ss A")}</>;
-      },
     },
     {
       header: "Created At",
