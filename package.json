@@ -1,58 +1,73 @@
 {
-  "name": "srmd-frontend-subtitle-editor",
-  "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "@azure/storage-blob": "^12.17.0",
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "@emotion/react": "^11.11.1",
-    "@emotion/styled": "^11.11.0",
-    "@mui/icons-material": "^5.14.19",
-    "@mui/lab": "^5.0.0-alpha.152",
-    "@mui/material": "^5.14.20",
-    "@mui/x-date-pickers": "^6.18.4",
-    "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
-    "axios": "^1.6.2",
-    "material-react-table": "^2.0.5",
-    "moment": "^2.29.4",
-    "node-webvtt": "^1.9.4",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-drag-drop-files": "^2.3.10",
-    "react-router-dom": "^6.18.0",
-    "react-scripts": "5.0.1",
-    "react-subtitle-editor": "^0.1.6",
-    "sweetalert2": "^11.10.1",
-    "validator": "^13.11.0",
-    "web-vitals": "^2.1.4"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test --transformIgnorePatterns \"node_modules/(?!frazy-parser)/\"",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ],
-    "rules": {
-      "no-unused-vars": "off"
+    "name": "srmd-frontend-subtitle-editor",
+    "version": "0.1.0",
+    "private": true,
+    "dependencies": {
+        "@azure/storage-blob": "^12.17.0",
+        "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+        "@emotion/react": "^11.11.1",
+        "@emotion/styled": "^11.11.0",
+        "@mui/icons-material": "^5.14.19",
+        "@mui/lab": "^5.0.0-alpha.152",
+        "@mui/material": "^5.14.20",
+        "@mui/x-date-pickers": "^6.18.4",
+        "@testing-library/jest-dom": "^5.17.0",
+        "@testing-library/react": "^13.4.0",
+        "@testing-library/user-event": "^13.5.0",
+        "axios": "^1.6.2",
+        "material-react-table": "^2.0.5",
+        "moment": "^2.29.4",
+        "node-webvtt": "^1.9.4",
+        "react-drag-drop-files": "^2.3.10",
+        "react-router-dom": "^6.18.0",
+        "react-subtitle-editor": "^0.1.6",
+        "sweetalert2": "^11.10.1",
+        "validator": "^13.11.0",
+        "web-vitals": "^2.1.4",
+        "@ffmpeg/ffmpeg": "^0.10.1",
+        "@forlagshuset/simple-fs": "^0.5.0",
+        "core-js": "^3.18.0",
+        "date-fns": "^2.30.0",
+        "duration-time-conversion": "^1.0.5",
+        "lodash": "^4.17.21",
+        "normalize.css": "^8.0.1",
+        "option-validator": "^2.0.6",
+        "react": "^18.2.0",
+        "react-contextmenu": "^2.14.0",
+        "react-dom": "^18.2.0",
+        "react-i18nify": "^4.2.1",
+        "react-notification-system": "^0.4.0",
+        "react-scripts": "4.0.3",
+        "react-textarea-autosize": "^8.3.3",
+        "react-virtualized": "^9.22.3",
+        "styled-components": "^5.3.1",
+        "wfplayer": "^2.1.0"
+    },
+    "scripts": {
+        "start": "react-scripts --openssl-legacy-provider start",
+        "build": "react-scripts build",
+        "test": "react-scripts test --transformIgnorePatterns \"node_modules/(?!frazy-parser)/\"",
+        "eject": "react-scripts eject"
+    },
+    "eslintConfig": {
+        "extends": [
+            "react-app",
+            "react-app/jest"
+        ],
+        "rules": {
+            "no-unused-vars": "off"
+        }
+    },
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
     }
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  }
 }
