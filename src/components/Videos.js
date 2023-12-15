@@ -26,7 +26,7 @@ const Videos = () => {
 
     async function UploadFile() {
         setFileUploading(true);
-        const new_file = new File([file], `${file.name.split('.mp4')[0]}-${Date.now()}.mp4`, {
+        const new_file = new File([file], `${file.name.split('.mp4')[0]}-${Date.now()}.mp4`.replace(/\s/g, ''), {
             type: file.type,
             lastModified: file.lastModified,
         });
@@ -159,7 +159,39 @@ const Videos = () => {
                             )}
 
                             <Button>
-                                <DeleteIcon style={{ color: 'darkred' }} />
+                                <DeleteIcon
+                                    onClick={(e) => {
+                                        console.log(
+                                            `https://speechtotexteditor.azurewebsites.net/api/v1/videos/${props.id}`,
+                                        );
+                                        setFileUploading(true);
+
+                                        axios
+                                            .delete(
+                                                `https://speechtotexteditor.azurewebsites.net/api/v1/videos/${props.id}`,
+                                            )
+                                            .then(function (response) {
+                                                setFileUploading(false);
+                                                // console.log(response);
+
+                                                Swal.fire({
+                                                    title: 'File Successfully Deleted!',
+                                                    text: 'Your video has been deleted!',
+                                                    icon: 'success',
+                                                    confirmButtonText: 'Close',
+                                                }).then((result) => {
+                                                    if (result.isConfirmed) {
+                                                        window.location.reload();
+                                                    }
+                                                });
+                                            })
+                                            .catch(function (error) {
+                                                console.log(error);
+                                                setFileUploading(false);
+                                            });
+                                    }}
+                                    style={{ color: 'darkred' }}
+                                />
                             </Button>
                         </div>
                     </>
