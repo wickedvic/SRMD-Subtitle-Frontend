@@ -41,7 +41,7 @@ const Style = styled.div`
             z-index: 20;
             left: 0;
             right: 0;
-            bottom: 5%;
+            bottom: 20%;
             width: 100%;
             padding: 0 20px;
             user-select: none;
@@ -112,7 +112,7 @@ const VideoWrap = memo(
 
         const videoProps = JSON.parse(localStorage.getItem('videoProps'));
 
-        return <video onClick={onClick} src={`${videoProps.videoUrl}`} ref={$video} />;
+        return <video controls onClick={onClick} src={`${videoProps.videoUrl}`} ref={$video} />;
     },
     () => true,
 );
