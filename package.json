@@ -59,6 +59,9 @@
             "no-unused-vars": "off"
         }
     },
+    "jest": {
+        "moduleFileExtensions": ["js", "jsx", "json", "node"]
+    },
     "browserslist": {
         "production": [
             ">0.2%",
