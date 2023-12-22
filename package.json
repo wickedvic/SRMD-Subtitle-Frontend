@@ -46,7 +46,8 @@
     },
     "scripts": {
         "start": "react-scripts --openssl-legacy-provider start",
-        "build": "react-scripts build",
+        "build": "react-scripts build --minify",
+        "unused:check": "depcheck --skip-missing --json | depcheck-json",
         "test": "react-scripts test",
         "eject": "react-scripts eject"
     },
@@ -58,6 +59,9 @@
         "rules": {
             "no-unused-vars": "off"
         }
+    },
+    "jest": {
+        "moduleFileExtensions": ["js", "jsx", "json", "node"]
     },
     "browserslist": {
         "production": [
