@@ -1,34 +1,38 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import Help from './components/Help';
 import Users from './components/Users';
 import Videos from './components/Videos';
-import Help from './components/Help';
 
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import Menu from '@mui/material/Menu';
-import Container from '@mui/material/Container';
-import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
-import Tooltip from '@mui/material/Tooltip';
-import MenuItem from '@mui/material/MenuItem';
-import VideoEditor from './components/editComponent/videoEditor';
-import Login from './components/Login';
 import { Backdrop, CircularProgress } from '@mui/material';
+import AppBar from '@mui/material/AppBar';
+import Avatar from '@mui/material/Avatar';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Container from '@mui/material/Container';
+import IconButton from '@mui/material/IconButton';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import Toolbar from '@mui/material/Toolbar';
+import Tooltip from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
+import Login from './components/Login';
 import Register from './components/Register';
 
 import 'core-js';
 import 'normalize.css';
-import './libs/contextmenu.css';
-import ReactDOM from 'react-dom';
-import { isMobile } from './utils';
 import { setLocale, setTranslations } from 'react-i18nify';
 import i18n from './i18n';
-import VideoPlayerApp from './VideoPlayerApp';
-import Mobile from './Mobile';
+import './libs/contextmenu.css';
+
+
+
+/**
+ * Function to initialize Sentry
+ */
+async function initializeVideoPlayerApp() {
+    const VideoPlayerApp = await import("./VideoPlayerApp");
+}
 
 setTranslations(i18n);
 const language = navigator.language.toLowerCase();
@@ -168,6 +172,7 @@ const App = () => {
                         </Routes>
                     </>
                 ) : (
+                    
                     <>
                         <AppBar position="static" style={{ backgroundColor: '#2C3D50' }}>
                             <Container maxWidth="xl">
@@ -249,6 +254,7 @@ const App = () => {
                         </AppBar>
 
                         <Routes>
+                            {initializeVideoPlayerApp()}
                             <Route path="/" element={<Videos />} />
                             <Route exact path="/users" element={<Users />} />
                             <Route exact path="/videos" element={<Videos />} />
