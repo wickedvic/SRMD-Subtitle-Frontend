@@ -7,6 +7,12 @@ on:
       - main
   workflow_dispatch:
 
+env:
+  AZURE_WEBAPP_NAME: 'frontendsubtitletest2'   # set this to your application's name
+  AZURE_WEBAPP_PACKAGE_PATH: '.'      # set this to the path to your web app project, defaults to the repository root
+  NODE_VERSION: '16.x'                # set this to the node version to use
+
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -17,12 +23,12 @@ jobs:
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
-          node-version: '18.x'
+          node-version: ${{ env.NODE_VERSION }}
 
       - name: npm install, build, and test
         run: |
-          npm install --force
-          npm config set legacy-peer-deps true
+          npm cache clean --force
+          npm install --force --legacy-peer-deps
           npm run build --if-present
           
       - name: Check current directory
@@ -77,7 +83,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
-          app-name: 'frontendsubtitletest2'
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
           slot-name: 'Production'
-          package: .
+          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_73775DFBFD4542428ECFC535083A4FD1 }}
