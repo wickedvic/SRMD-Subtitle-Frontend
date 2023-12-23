@@ -6,7 +6,7 @@ name: Staging Slot Web App
 on:
   push:
     branches:
-      - dev
+      - origin/nidhi-refactor
   workflow_dispatch:
 
 jobs:
