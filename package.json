@@ -46,7 +46,7 @@
     },
     "scripts": {
         "start": "react-scripts --openssl-legacy-provider start",
-        "build": "react-scripts build --minify",
+        "build": "react-scripts build",
         "unused:check": "depcheck --skip-missing --json | depcheck-json",
         "test": "react-scripts test",
         "eject": "react-scripts eject"
