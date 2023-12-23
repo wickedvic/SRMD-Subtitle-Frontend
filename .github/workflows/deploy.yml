@@ -22,8 +22,8 @@ jobs:
       - name: npm install, build, and test
         run: |
           npm cache clean --force
-          npm install --force
           npm config set legacy-peer-deps true
+          npm install --force --legacy-peer-deps
           npm run build --if-present
           
       - name: Check current directory
