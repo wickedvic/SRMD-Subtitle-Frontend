@@ -24,15 +24,7 @@ import 'normalize.css';
 import { setLocale, setTranslations } from 'react-i18nify';
 import i18n from './i18n';
 import './libs/contextmenu.css';
-
-
-
-/**
- * Function to initialize Sentry
- */
-async function initializeVideoPlayerApp() {
-    const VideoPlayerApp = await import("./VideoPlayerApp");
-}
+import VideoPlayerApp from './VideoPlayerApp';
 
 setTranslations(i18n);
 const language = navigator.language.toLowerCase();
@@ -172,7 +164,6 @@ const App = () => {
                         </Routes>
                     </>
                 ) : (
-                    
                     <>
                         <AppBar position="static" style={{ backgroundColor: '#2C3D50' }}>
                             <Container maxWidth="xl">
@@ -254,7 +245,6 @@ const App = () => {
                         </AppBar>
 
                         <Routes>
-                            {initializeVideoPlayerApp()}
                             <Route path="/" element={<Videos />} />
                             <Route exact path="/users" element={<Users />} />
                             <Route exact path="/videos" element={<Videos />} />
