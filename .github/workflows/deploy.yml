@@ -79,17 +79,17 @@ jobs:
       - name: Unzip artifact for deployment
         run: unzip release.zip
         
-      - name: npm config
-        run: |
-          npm config set legacy-peer-deps=true 
-          npm config set force=true 
-
       - name: Node sample
         uses: actions/setup-node@v4
         with:
           node-version: '18.x'
           cache: 'npm'
           
+      - name: npm config
+        run: |
+          npm config set legacy-peer-deps=true 
+          npm config set force=true 
+      
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
