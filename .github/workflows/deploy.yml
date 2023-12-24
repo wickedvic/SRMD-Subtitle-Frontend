@@ -16,6 +16,9 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment:
+      name: 'Production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
       - uses: actions/checkout@v4
@@ -30,21 +33,9 @@ jobs:
           npm cache clean --force
           npm install --force --legacy-peer-deps
           npm run build --if-present
-          
-      - name: Check current directory
-        run: pwd
-
-      - name: List contents of the directory
-        run: ls -la
-
+        
       - name: Zip artifact for deployment
         run: zip release.zip ./* -r
-
-      - name: Check current directory
-        run: pwd
-
-      - name: List contents of the directory
-        run: ls -la
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
@@ -52,14 +43,6 @@ jobs:
           name: node-app
           path: release.zip
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    environment:
-      name: 'Production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-
-    steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v3
         with:
@@ -69,32 +52,14 @@ jobs:
         run: |
           az login --service-principal -u 8c2825f7-4cf5-49a6-97ce-b215d858a8f7 -p QQc8Q~nX7oL45mK1TiTw~UvokEGBkkBOxrLIQbm9 --tenant 916e2878-2f9a-419b-8bb0-fa4d123903c6
           az account set --subscription 4549d703-b6fe-4930-abbd-17b079788538
-          
-      - name: Check current directory
-        run: pwd
-
-      - name: List contents of the directory
-        run: ls -la
 
       - name: Unzip artifact for deployment
         run: unzip release.zip
-        
-      - name: Node sample
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Node config
-        run: |
-          npm cache clean --force
-          npm config set force=true legacy-peer-deps=true
           
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          # startup-command: npm install --force --legacy-peer-deps
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           slot-name: 'Production'
           package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
