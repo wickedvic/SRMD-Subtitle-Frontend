@@ -84,6 +84,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
+
+      - name: Node config
+        run: |
+          npm cache clean --force
+          npm config set force=true legacy-peer-deps=true
           
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
