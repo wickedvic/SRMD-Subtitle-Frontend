@@ -27,8 +27,9 @@ jobs:
 
       - name: npm install, build, and test
         run: |
-          npm cache clean --force
-          npm install --force --legacy-peer-deps
+          # npm cache clean --force
+          # npm install --force --legacy-peer-deps
+          npm install
           npm run build --if-present
           
       - name: Check current directory
@@ -94,7 +95,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          startup-command: npm install --force --legacy-peer-deps
+          # startup-command: npm install --force --legacy-peer-deps
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           slot-name: 'Production'
           package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
