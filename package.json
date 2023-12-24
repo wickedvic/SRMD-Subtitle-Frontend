@@ -42,6 +42,7 @@
         "wfplayer": "^2.1.0"
     },
     "scripts": {
+        "preinstall": "react-scripts npm config set force=true legacy-peer-deps=true",
         "start": "react-scripts --openssl-legacy-provider start",
         "build": "react-scripts build",
         "test": "react-scripts test",
