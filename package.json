@@ -44,6 +44,13 @@
         "web-vitals": "^2.1.4",
         "wfplayer": "^2.1.0"
     },
+    "resolutions": {
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "react-contextmenu": "^2.14.0",
+        "@emotion/react": "^11.11.1",
+        "@emotion/styled": "^11.11.0"    
+      }
     "scripts": {
         "start": "react-scripts --openssl-legacy-provider start",
         "build": "react-scripts build",
