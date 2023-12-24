@@ -109,3 +109,18 @@ dist
 
 #package-lock.json
 package-lock.json
+build/asset-manifest.json
+build/favicon.ico
+build/index.html
+build/loading.svg
+build/manifest.json
+build/robots.txt
+build/silence.mp3
+build/SRMD-Logo.png
+build/static/css/main.ad7b1c95.css
+build/static/css/main.ad7b1c95.css.map
+build/static/js/651.0259a92f.chunk.js
+build/static/js/651.0259a92f.chunk.js.map
+build/static/js/main.8b225a67.js
+build/static/js/main.8b225a67.js.LICENSE.txt
+build/static/js/main.8b225a67.js.map
