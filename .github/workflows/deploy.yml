@@ -54,7 +54,7 @@ jobs:
           az account set --subscription 4549d703-b6fe-4930-abbd-17b079788538
 
       - name: Unzip artifact for deployment
-        run: unzip release.zip -o
+        run: unzip -o release.zip
           
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
