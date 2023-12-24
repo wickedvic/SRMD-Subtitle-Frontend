@@ -85,11 +85,6 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           
-      - name: npm config
-        run: |
-          npm install react@^18.2.0
-          npm install react-contextmenu@^2.14.0
-      
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
