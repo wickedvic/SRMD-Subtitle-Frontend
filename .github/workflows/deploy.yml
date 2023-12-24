@@ -64,3 +64,6 @@ jobs:
           slot-name: 'Production'
           package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_73775DFBFD4542428ECFC535083A4FD1 }}
+        env:
+          NPM_CONFIG_FORCE: true
+          NPM_CONFIG_LEGACY_PEER_DEPS: true
