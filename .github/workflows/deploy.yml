@@ -94,7 +94,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          startup-command: npm config set force=true legacy-peer-deps=true
+          startup-command: npm config set force=true legacy-peer-deps=true && npm install
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           slot-name: 'Production'
           package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
