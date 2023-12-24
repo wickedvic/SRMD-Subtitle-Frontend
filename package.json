@@ -19,7 +19,7 @@
         "date-fns": "^2.30.0",
         "duration-time-conversion": "^1.0.5",
         "lodash": "^4.17.21",
-        "material-react-table": "^3.2.2",
+        "material-react-table": "^3.0.0",
         "moment": "^2.29.4",
         "node-webvtt": "^1.9.4",
         "normalize.css": "^8.0.1",
