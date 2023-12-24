@@ -107,5 +107,19 @@ dist
 # build files 
 .build/
 
-#package-lock.json
-package-lock.json
+
+build/static/js/main.8b225a67.js.map
+build/static/js/main.8b225a67.js.LICENSE.txt
+build/static/js/main.8b225a67.js
+build/static/js/651.0259a92f.chunk.js.map
+build/static/js/651.0259a92f.chunk.js
+build/static/css/main.8e7395a4.css.map
+build/static/css/main.8e7395a4.css
+build/SRMD-Logo.png
+build/silence.mp3
+build/robots.txt
+build/manifest.json
+build/loading.svg
+build/index.html
+build/favicon.ico
+build/asset-manifest.json
