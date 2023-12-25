@@ -16,9 +16,6 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment:
-      name: 'Production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
       - uses: actions/checkout@v4
@@ -43,6 +40,14 @@ jobs:
           name: node-app
           path: release.zip
 
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: 'Production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+    steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v3
         with:
@@ -54,16 +59,25 @@ jobs:
           az account set --subscription 4549d703-b6fe-4930-abbd-17b079788538
 
       - name: Unzip artifact for deployment
-        run: unzip -o release.zip
+        run: unzip release.zip
+        
+      - name: Node sample
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Node config
+        run: |
+          npm cache clean --force
+          npm config set force=true legacy-peer-deps=true
           
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
+          # startup-command: npm install --force --legacy-peer-deps
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           slot-name: 'Production'
           package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_73775DFBFD4542428ECFC535083A4FD1 }}
-        env:
-          NPM_CONFIG_FORCE: true
-          NPM_CONFIG_LEGACY_PEER_DEPS: true
