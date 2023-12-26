@@ -18,6 +18,9 @@ const Style = styled.div`
             .item {
                 height: 100%;
                 padding: 5px;
+                display: flex;
+                flex: 1 1 0%;
+                flex-direction: row;
 
                 .textarea {
                     border: none;
@@ -36,6 +39,7 @@ const Style = styled.div`
                     &.highlight {
                         background-color: rgb(0 87 158);
                         border: 1px solid rgba(255, 255, 255, 0.3);
+                        z-index: 100;
                     }
 
                     &.illegal {
@@ -43,12 +47,27 @@ const Style = styled.div`
                         border: 1px solid rgba(255, 255, 255, 0.3);
                     }
                 }
+
+                .container ul {
+                    padding: 0;
+                    z-index: 100;
+                    background-color: rgb(32, 32, 32);
+                    margin-left: -50px;
+
+                    li:first-of-type {
+                        font-weight: bold;
+                        color: white;
+                        background-color: rgb(0 87 158);
+                    }
+                }
             }
+
+            overflow: visible !important;
         }
     }
 `;
 
-export default function Subtitles({ currentIndex, subtitle, checkSub, player, updateSub }) {
+export default function Subtitles({ currentIndex, subtitle, checkSub, player, updateSub, translate, sub }) {
     const [height, setHeight] = useState(100);
 
     const resize = useCallback(() => {
@@ -65,54 +84,80 @@ export default function Subtitles({ currentIndex, subtitle, checkSub, player, up
     }, [resize]);
 
     return (
-        <Style className="subtitles">
-            <Table
-                headerHeight={40}
-                width={250}
-                height={height}
-                rowHeight={80}
-                scrollToIndex={currentIndex}
-                rowCount={subtitle.length}
-                rowGetter={({ index }) => subtitle[index]}
-                headerRowRenderer={() => null}
-                rowRenderer={(props) => {
-                    return (
-                        <div
-                            key={props.key}
-                            className={props.className}
-                            style={props.style}
-                            onClick={() => {
-                                if (player) {
-                                    player.pause();
-                                    if (player.duration >= props.rowData.startTime) {
-                                        player.currentTime = props.rowData.startTime + 0.001;
-                                    }
-                                }
-                            }}
-                        >
-                            <div className="item">
-                                <textarea
-                                    maxLength={200}
-                                    spellCheck={false}
-                                    className={[
-                                        'textarea',
-                                        currentIndex === props.index ? 'highlight' : '',
-                                        checkSub(props.rowData) ? 'illegal' : '',
-                                    ]
-                                        .join(' ')
-                                        .trim()}
-                                    value={unescape(props.rowData.text)}
-                                    onChange={(event) => {
-                                        updateSub(props.rowData, {
-                                            text: event.target.value,
-                                        });
+        <>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly' }}>
+                    <div>Translated Text</div>
+                    <div>Original Text</div>
+                </div>
+                <Style className="subtitles">
+                    <Table
+                        headerHeight={40}
+                        width={450}
+                        height={height}
+                        rowHeight={80}
+                        scrollToIndex={currentIndex}
+                        rowCount={subtitle.length}
+                        rowGetter={({ index }) => subtitle[index]}
+                        headerRowRenderer={() => null}
+                        rowRenderer={(props) => {
+                            return (
+                                <div
+                                    key={props.key}
+                                    className={props.className}
+                                    style={props.style}
+                                    onClick={() => {
+                                        if (player) {
+                                            player.pause();
+                                            if (player.duration >= props.rowData.startTime) {
+                                                player.currentTime = props.rowData.startTime + 0.001;
+                                            }
+                                        }
                                     }}
-                                />
-                            </div>
-                        </div>
-                    );
-                }}
-            ></Table>
-        </Style>
+                                >
+                                    <div className="item">
+                                        <textarea
+                                            maxLength={200}
+                                            spellCheck={false}
+                                            className={[
+                                                'textarea',
+                                                currentIndex === props.index ? 'highlight' : '',
+                                                checkSub(props.rowData) ? 'illegal' : '',
+                                            ]
+                                                .join(' ')
+                                                .trim()}
+                                            value={unescape(props.rowData.text)}
+                                            onChange={(event) => {
+                                                updateSub(props.rowData, {
+                                                    text: event.target.value,
+                                                });
+                                            }}
+                                        />
+
+                                        <textarea
+                                            maxLength={200}
+                                            spellCheck={false}
+                                            className={[
+                                                'textarea',
+                                                currentIndex === props.index ? 'highlight' : '',
+                                                checkSub(props.rowData) ? 'illegal' : '',
+                                            ]
+                                                .join(' ')
+                                                .trim()}
+                                            value={unescape(props.rowData.text2)}
+                                            onChange={(event) => {
+                                                updateSub(props.rowData, {
+                                                    text2: event.target.value,
+                                                });
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            );
+                        }}
+                    ></Table>
+                </Style>
+            </div>
+        </>
     );
 }

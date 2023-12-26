@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-
 import NotificationSystem from 'react-notification-system';
 import DT from 'duration-time-conversion';
 import isEqual from 'lodash/isEqual';
 import styled from 'styled-components';
-import Tool from './folders/Tool';
 import Subtitles from './folders/Subtitles';
 import Player from './folders/Player';
 import Footer from './folders/Footer';
@@ -24,15 +22,13 @@ const Style = styled.div`
         height: calc(100% - 200px);
 
         .player {
-            flex: 1;
+            flex: 3;
+            width: 1000px;
         }
 
         .subtitles {
-            width: 250px;
-        }
-
-        .tool {
-            width: 300px;
+            width: 100%;
+            overflow: scroll;
         }
     }
 
@@ -53,6 +49,9 @@ export default function VideoPlayerApp({ defaultLang }) {
     const [playing, setPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [currentIndex, setCurrentIndex] = useState(-1);
+    const [translate, setTranslate] = useState('en');
+    const [directUrl, setDirectUrl] = useState(null);
+    const [viewEng, setViewEng] = useState(true);
 
     const newSub = useCallback((item) => new Sub(item), []);
     const hasSub = useCallback((sub) => subtitle.indexOf(sub), [subtitle]);
@@ -78,6 +77,7 @@ export default function VideoPlayerApp({ defaultLang }) {
                     }
                     subtitleHistory.current.push(formatSub(subtitle));
                 }
+
                 window.localStorage.setItem('subtitle', JSON.stringify(newSubtitle));
                 setSubtitleOriginal(newSubtitle);
             }
@@ -165,11 +165,21 @@ export default function VideoPlayerApp({ defaultLang }) {
             const subs = copySubs();
             const next = subs[index + 1];
             if (!next) return;
-            const merge = newSub({
-                start: sub.start,
-                end: next.end,
-                text: sub.text.trim() + '\n' + next.text.trim(),
-            });
+            let merge;
+            if (!sub.text2) {
+                merge = newSub({
+                    start: sub.start,
+                    end: next.end,
+                    text: sub.text.trim() + '\n' + next.text.trim(),
+                });
+            } else {
+                merge = newSub({
+                    start: sub.start,
+                    end: next.end,
+                    text: sub.text.trim() + '\n' + next.text.trim(),
+                    text2: sub.text2.trim() + '\n' + next.text2.trim(),
+                });
+            }
             subs[index] = merge;
             subs.splice(index + 1, 1);
             setSubtitle(subs);
@@ -181,35 +191,61 @@ export default function VideoPlayerApp({ defaultLang }) {
         (sub, start) => {
             const index = hasSub(sub);
             if (index < 0 || !sub.text || !start) return;
+            const text = viewEng || !sub.text2 ? sub.text : sub.text2;
             const subs = copySubs();
-            const text1 = sub.text.slice(0, start).trim();
-            const text2 = sub.text.slice(start).trim();
-            if (!text1 || !text2) return;
-            const splitDuration = (sub.duration * (start / sub.text.length)).toFixed(3);
+            const textLeft = text.slice(0, start).trim();
+            const textRight = text.slice(start).trim();
+            if (!textLeft || !textRight) return;
+            const splitDuration = (sub.duration * (start / text.length)).toFixed(3);
             if (splitDuration < 0.2 || sub.duration - splitDuration < 0.2) return;
             subs.splice(index, 1);
             const middleTime = DT.d2t(sub.startTime + parseFloat(splitDuration));
-            subs.splice(
-                index,
-                0,
-                newSub({
-                    start: sub.start,
-                    end: middleTime,
-                    text: text1,
-                }),
-            );
-            subs.splice(
-                index + 1,
-                0,
-                newSub({
-                    start: middleTime,
-                    end: sub.end,
-                    text: text2,
-                }),
-            );
+            if (viewEng || !sub.text2) {
+                subs.splice(
+                    index,
+                    0,
+                    newSub({
+                        start: sub.start,
+                        end: middleTime,
+                        text: textLeft,
+                        text2: sub.text2 ? sub.text2 : '',
+                    }),
+                );
+                subs.splice(
+                    index + 1,
+                    0,
+                    newSub({
+                        start: middleTime,
+                        end: sub.end,
+                        text: textRight,
+                        text2: sub.text2 ? sub.text2 : '',
+                    }),
+                );
+            } else {
+                subs.splice(
+                    index,
+                    0,
+                    newSub({
+                        start: sub.start,
+                        end: middleTime,
+                        text: sub.text,
+                        text2: textLeft,
+                    }),
+                );
+                subs.splice(
+                    index + 1,
+                    0,
+                    newSub({
+                        start: middleTime,
+                        end: sub.end,
+                        text: sub.text,
+                        text2: textRight,
+                    }),
+                );
+            }
             setSubtitle(subs);
         },
-        [hasSub, copySubs, setSubtitle, newSub],
+        [hasSub, copySubs, setSubtitle, newSub, viewEng],
     );
 
     const onKeyDown = useCallback(
@@ -269,6 +305,13 @@ export default function VideoPlayerApp({ defaultLang }) {
 
         let cleanedData = timelineData.filter((res) => res.start !== res.end);
 
+        const stateUpdated = cleanedData.map((item, index) => {
+            return {
+                ...item,
+                text2: cleanedData[index]?.text,
+            };
+        });
+
         if (localSubtitleString) {
             try {
                 const localSubtitle = JSON.parse(localSubtitleString);
@@ -276,13 +319,13 @@ export default function VideoPlayerApp({ defaultLang }) {
                 if (localSubtitle.length) {
                     setSubtitleOriginal(localSubtitle.map((item) => new Sub(item)));
                 } else {
-                    setSubtitleOriginal(cleanedData.map((item) => new Sub(item)));
+                    setSubtitleOriginal(stateUpdated.map((item) => new Sub(item)));
                 }
             } catch (error) {
-                setSubtitleOriginal(cleanedData.map((item) => new Sub(item)));
+                setSubtitleOriginal(stateUpdated.map((item) => new Sub(item)));
             }
         } else {
-            setSubtitleOriginal(cleanedData.map((item) => new Sub(item)));
+            setSubtitleOriginal(stateUpdated.map((item) => new Sub(item)));
         }
     }, [setSubtitleOriginal]);
 
@@ -305,6 +348,12 @@ export default function VideoPlayerApp({ defaultLang }) {
         setLoading,
         setProcessing,
         subtitleHistory,
+        translate,
+        setTranslate,
+        directUrl,
+        setDirectUrl,
+        viewEng,
+        setViewEng,
 
         notify,
         newSub,
@@ -327,7 +376,6 @@ export default function VideoPlayerApp({ defaultLang }) {
                 <div className="main">
                     <Player {...props} />
                     <Subtitles {...props} />
-                    <Tool {...props} />
                 </div>
                 <Footer {...props} />
                 {loading ? <Loading loading={loading} /> : null}
