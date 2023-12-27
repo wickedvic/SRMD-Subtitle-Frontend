@@ -248,7 +248,6 @@ const App = () => {
                             <Route path="/" element={<Videos />} />
                             <Route exact path="/users" element={<Users />} />
                             <Route exact path="/videos" element={<Videos />} />
-                            {/* <Route exact path="/videos/edit" element={<VideoEditor />} /> */}
 
                             <Route exact path="/videos/edit" element={<VideoPlayerApp defaultLang={defaultLang} />} />
 

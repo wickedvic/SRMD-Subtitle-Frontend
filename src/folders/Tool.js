@@ -14,6 +14,7 @@ import Swal from 'sweetalert2';
 import Popover from '@mui/material/Popover';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
+import { Checkbox } from '@mui/material';
 
 const Style = styled.div`
     display: flex;
@@ -385,21 +386,31 @@ export default function Header({
                             }}
                         >
                             <Typography sx={{ p: 2 }}>Play/Pause Video: Spacebar</Typography>
-                            <Typography sx={{ p: 2 }}>Undo: Ctrl + Z</Typography>
+                            <Typography sx={{ p: 2 }}>Undo: Ctrl + Z </Typography>
                             <Typography sx={{ p: 2 }}>Copy: Ctrl + C</Typography>
                             <Typography sx={{ p: 2 }}>Paste: Ctrl + V</Typography>
+                            <Typography sx={{ p: 2 }}>New Subtitle: Drag on timeline</Typography>
+                            <Typography sx={{ p: 2 }}>
+                                Delete Subtitle: Trash icon or right click timeline subtitle
+                            </Typography>
+                            <Typography sx={{ p: 2 }}>
+                                Merge Subtitle: Merge icon or right click timeline subtitle
+                            </Typography>
+
+                            <Typography sx={{ p: 2 }}>
+                                Change Subtitle View: Click checkbox to see translated text/original text. Will render
+                                on video and timeline. As well as what is exported
+                            </Typography>
                         </Popover>
                     </div>
 
-                    <label style={{ color: '#FFF', marginLeft: '10px', marginRight: '5px' }}>
-                        Use Original Subtitles?
-                    </label>
-                    <input
-                        type="checkbox"
+                    <label style={{ color: '#FFF', marginLeft: '20px' }}>Use Original Text?</label>
+
+                    <Checkbox
                         onChange={() => {
                             setViewEng(!viewEng);
                         }}
-                        autoComplete="off"
+                        style={{ color: '#FFF', bottom: '3px' }}
                     />
                 </div>
 
@@ -422,63 +433,78 @@ export default function Header({
                     <div
                         className="btn"
                         onClick={(e) => {
-                            setLoading(t('UPDATING'));
-                            const parsedSubtitle = {
-                                cues: [],
-                                valid: true,
-                            };
-                            subtitle.forEach((subtitle, index) => {
-                                const cue = {
-                                    identifier: '',
-                                    start: subtitle.start.split(':').reduce((acc, time) => 60 * acc + +time),
-                                    end: subtitle.end.split(':').reduce((acc, time) => 60 * acc + +time),
-                                    text: subtitle.text,
-                                    styles: 'line:13 position:50% align:center size:80%',
-                                };
-                                parsedSubtitle.cues.push(cue);
-                            });
-                            console.log(parsedSubtitle);
-
-                            try {
-                                const videoProps = JSON.parse(localStorage.getItem('videoProps'));
-                                const modifiedSubtitleContent = WebVTT.compile(parsedSubtitle);
-
-                                axios
-                                    .put(
-                                        `https://speechtotexteditor.azurewebsites.net/api/v1/videos/${videoProps.id}`,
-                                        {
-                                            subtitleString: btoa(modifiedSubtitleContent),
-                                        },
-                                    )
-                                    .then(function (response) {
-                                        setLoading('');
-
-                                        Swal.fire({
-                                            title: 'Success!',
-                                            text: 'Your changes have been saved!',
-                                            icon: 'success',
-                                            confirmButtonText: 'Close',
-                                        }).then((result) => {
-                                            if (result.isConfirmed) {
-                                                localStorage.removeItem('subtitle');
-                                                localStorage.setItem('videoProps', JSON.stringify(response.data));
-
-                                                window.location.reload();
-                                            }
-                                        });
-                                    })
-                                    .catch(function (error) {
-                                        console.log(error);
+                            Swal.fire({
+                                title: 'Do you want to save changes?',
+                                showDenyButton: true,
+                                showCancelButton: true,
+                                confirmButtonText: 'Save',
+                                denyButtonText: `Don't save`,
+                            }).then((result) => {
+                                /* Read more about isConfirmed, isDenied below */
+                                if (result.isConfirmed) {
+                                    setLoading(t('UPDATING'));
+                                    const parsedSubtitle = {
+                                        cues: [],
+                                        valid: true,
+                                    };
+                                    subtitle.forEach((subtitle, index) => {
+                                        const cue = {
+                                            identifier: '',
+                                            start: subtitle.start.split(':').reduce((acc, time) => 60 * acc + +time),
+                                            end: subtitle.end.split(':').reduce((acc, time) => 60 * acc + +time),
+                                            text: subtitle.text,
+                                            styles: 'line:13 position:50% align:center size:80%',
+                                        };
+                                        parsedSubtitle.cues.push(cue);
                                     });
-                            } catch (error) {
-                                setLoading('');
-                                Swal.fire({
-                                    title: 'Error!',
-                                    text: 'Subtitle Timings Overlap. Please fix and try again!',
-                                    icon: 'error',
-                                    confirmButtonText: 'Close',
-                                });
-                            }
+
+                                    try {
+                                        const videoProps = JSON.parse(localStorage.getItem('videoProps'));
+                                        const modifiedSubtitleContent = WebVTT.compile(parsedSubtitle);
+
+                                        axios
+                                            .put(
+                                                `https://speechtotexteditor.azurewebsites.net/api/v1/videos/${videoProps.id}`,
+                                                {
+                                                    subtitleString: btoa(modifiedSubtitleContent),
+                                                },
+                                            )
+                                            .then(function (response) {
+                                                setLoading('');
+
+                                                Swal.fire({
+                                                    title: 'Success!',
+                                                    text: 'Your changes have been saved!',
+                                                    icon: 'success',
+                                                    confirmButtonText: 'Close',
+                                                }).then((result) => {
+                                                    if (result.isConfirmed) {
+                                                        localStorage.removeItem('subtitle');
+                                                        localStorage.setItem(
+                                                            'videoProps',
+                                                            JSON.stringify(response.data),
+                                                        );
+
+                                                        window.location.reload();
+                                                    }
+                                                });
+                                            })
+                                            .catch(function (error) {
+                                                console.log(error);
+                                            });
+                                    } catch (error) {
+                                        setLoading('');
+                                        Swal.fire({
+                                            title: 'Error!',
+                                            text: 'Subtitle Timings Overlap. Please fix and try again!',
+                                            icon: 'error',
+                                            confirmButtonText: 'Close',
+                                        });
+                                    }
+                                } else if (result.isDenied) {
+                                    Swal.fire('Changes are not saved', '', 'info');
+                                }
+                            });
                         }}
                     >
                         <Translate value="Save" />

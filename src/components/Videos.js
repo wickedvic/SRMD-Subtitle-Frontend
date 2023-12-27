@@ -91,8 +91,12 @@ const Videos = () => {
 
     const videoColumns = [
         {
-            header: 'Video URL',
+            header: 'Video Title',
             accessorKey: 'videoUrl',
+            Cell: ({ cell }) => {
+                const props = cell.row.original;
+                return <>{props.videoUrl.split('video/')[1]}</>;
+            },
         },
         {
             header: 'Created At',
@@ -161,34 +165,44 @@ const Videos = () => {
                             <Button>
                                 <DeleteIcon
                                     onClick={(e) => {
-                                        console.log(
-                                            `https://speechtotexteditor.azurewebsites.net/api/v1/videos/${props.id}`,
-                                        );
-                                        setFileUploading(true);
+                                        Swal.fire({
+                                            title: 'Do you want to delete the video?',
+                                            showDenyButton: true,
+                                            showCancelButton: true,
+                                            confirmButtonText: 'Confirm',
+                                            denyButtonText: `Don't Delete`,
+                                        }).then((result) => {
+                                            /* Read more about isConfirmed, isDenied below */
+                                            if (result.isConfirmed) {
+                                                setFileUploading(true);
 
-                                        axios
-                                            .delete(
-                                                `https://speechtotexteditor.azurewebsites.net/api/v1/videos/${props.id}`,
-                                            )
-                                            .then(function (response) {
-                                                setFileUploading(false);
-                                                // console.log(response);
+                                                axios
+                                                    .delete(
+                                                        `https://speechtotexteditor.azurewebsites.net/api/v1/videos/${props.id}`,
+                                                    )
+                                                    .then(function (response) {
+                                                        setFileUploading(false);
+                                                        // console.log(response);
 
-                                                Swal.fire({
-                                                    title: 'File Successfully Deleted!',
-                                                    text: 'Your video has been deleted!',
-                                                    icon: 'success',
-                                                    confirmButtonText: 'Close',
-                                                }).then((result) => {
-                                                    if (result.isConfirmed) {
-                                                        window.location.reload();
-                                                    }
-                                                });
-                                            })
-                                            .catch(function (error) {
-                                                console.log(error);
-                                                setFileUploading(false);
-                                            });
+                                                        Swal.fire({
+                                                            title: 'Video Successfully Deleted!',
+                                                            text: 'Your video has been deleted!',
+                                                            icon: 'success',
+                                                            confirmButtonText: 'Close',
+                                                        }).then((result) => {
+                                                            if (result.isConfirmed) {
+                                                                window.location.reload();
+                                                            }
+                                                        });
+                                                    })
+                                                    .catch(function (error) {
+                                                        console.log(error);
+                                                        setFileUploading(false);
+                                                    });
+                                            } else if (result.isDenied) {
+                                                Swal.fire('Video Not Deleted', '', 'info');
+                                            }
+                                        });
                                     }}
                                     style={{ color: 'darkred' }}
                                 />
