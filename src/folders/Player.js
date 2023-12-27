@@ -1,9 +1,12 @@
 import React, { useState, useEffect, createRef, useCallback, useMemo, memo } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
 import { Translate } from 'react-i18nify';
+
 import styled from 'styled-components';
 
 import { isPlaying } from '../utils';
+
+import Tool from './Tool';
 
 const Style = styled.div`
     display: flex;
@@ -11,13 +14,14 @@ const Style = styled.div`
     justify-content: center;
     height: 100%;
     width: 100%;
-    padding: 20% 10%;
+
+    flex-direction: column;
 
     .video {
         display: flex;
         align-items: center;
         justify-content: center;
-        height: auto;
+        height: 350px;
         width: auto;
         position: relative;
 
@@ -30,6 +34,19 @@ const Style = styled.div`
             box-shadow: 0px 5px 25px 5px rgb(0 0 0 / 80%);
             background-color: #000;
             cursor: pointer;
+        }
+
+        .videoPlaceholder {
+            position: fixed;
+            z-index: 20;
+            outline: none;
+            max-height: 40%;
+            width: 620px;
+            background-color: #000000dd;
+            cursor: pointer;
+            padding: 20px;
+            font-size: 1.5em;
+            color: white;
         }
 
         .subtitle {
@@ -75,8 +92,18 @@ const Style = styled.div`
                 text-shadow: rgb(0 0 0) 1px 0px 1px, rgb(0 0 0) 0px 1px 1px, rgb(0 0 0) -1px 0px 1px,
                     rgb(0 0 0) 0px -1px 1px;
 
-                &.pause {
-                    background-color: rgb(0 0 0 / 50%);
+                background-color: rgb(0 0 0 / 50%);
+            }
+
+            .container ul {
+                padding: 0;
+                z-index: 100;
+                background-color: rgb(32, 32, 32);
+
+                li:first-of-type {
+                    font-weight: bold;
+                    color: white;
+                    background-color: rgb(0 87 158);
                 }
             }
         }
@@ -109,10 +136,12 @@ const VideoWrap = memo(
                 }
             }
         }, [$video]);
-
         const videoProps = JSON.parse(localStorage.getItem('videoProps'));
-
-        return <video controls onClick={onClick} src={`${videoProps.videoUrl}`} ref={$video} />;
+        return (
+            <>
+                <video onClick={onClick} src={`${videoProps.videoUrl}`} ref={$video} controls={true} />
+            </>
+        );
     },
     () => true,
 );
@@ -127,7 +156,7 @@ export default function Player(props) {
         setCurrentSub(props.subtitle[props.currentIndex]);
     }, [props.subtitle, props.currentIndex]);
 
-    const onChange = useCallback(
+    const onChangeEng = useCallback(
         (event) => {
             props.player.pause();
             props.updateSub(currentSub, { text: event.target.value });
@@ -164,29 +193,48 @@ export default function Player(props) {
     }, [props, currentSub, inputItemCursor]);
 
     return (
-        <Style className="player">
-            <div className="video" ref={$player}>
-                <VideoWrap {...props} />
-                {props.player && currentSub ? (
-                    <div className="subtitle">
-                        {focusing ? (
-                            <div className="operate" onClick={onSplit}>
-                                <Translate value="SPLIT" />
+        <>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <Style className="player">
+                    <div className="video" ref={$player}>
+                        <VideoWrap {...props} />
+                        {props.player && currentSub ? (
+                            <div className="subtitle">
+                                {focusing ? (
+                                    <div className="operate" onClick={onSplit}>
+                                        <Translate value="SPLIT" />
+                                    </div>
+                                ) : null}
+                                {props.viewEng || !currentSub.text2 ? (
+                                    <TextareaAutosize
+                                        className={`textarea`}
+                                        value={currentSub.text}
+                                        onChange={onChangeEng}
+                                        onClick={onClick}
+                                        onFocus={onFocus}
+                                        onBlur={onBlur}
+                                        onKeyDown={onFocus}
+                                        spellCheck={false}
+                                    />
+                                ) : (
+                                    <TextareaAutosize
+                                        className={`textarea`}
+                                        value={currentSub.text2}
+                                        onChange={onChangeEng}
+                                        onClick={onClick}
+                                        onFocus={onFocus}
+                                        onBlur={onBlur}
+                                        onKeyDown={onFocus}
+                                        spellCheck={false}
+                                    />
+                                )}
                             </div>
                         ) : null}
-                        <TextareaAutosize
-                            className={`textarea ${!props.playing ? 'pause' : ''}`}
-                            value={currentSub.text}
-                            onChange={onChange}
-                            onClick={onClick}
-                            onFocus={onFocus}
-                            onBlur={onBlur}
-                            onKeyDown={onFocus}
-                            spellCheck={false}
-                        />
                     </div>
-                ) : null}
+                </Style>
+
+                <Tool {...props} />
             </div>
-        </Style>
+        </>
     );
 }

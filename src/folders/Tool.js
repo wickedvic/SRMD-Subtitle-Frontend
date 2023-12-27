@@ -11,6 +11,10 @@ import WebVTT from 'node-webvtt';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
+import Popover from '@mui/material/Popover';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+
 const Style = styled.div`
     display: flex;
     flex-direction: column;
@@ -18,7 +22,7 @@ const Style = styled.div`
     padding-bottom: 20px;
     position: relative;
     overflow: hidden;
-    background-color: rgb(0 0 0 / 100%);
+
     border-left: 1px solid rgb(255 255 255 / 20%);
 
     .import {
@@ -173,6 +177,39 @@ const Style = styled.div`
         }
     }
 
+    .export1 {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px;
+        border-bottom: 1px solid rgb(255 255 255 / 20%);
+
+        select {
+            width: 65%;
+            outline: none;
+            padding: 0 5px;
+            border-radius: 3px;
+        }
+
+        .btn {
+            opacity: 0.85;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 35px;
+            width: 33%;
+            border-radius: 3px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 13px;
+            background-color: #673ab7;
+            transition: all 0.2s ease 0s;
+
+            &:hover {
+                opacity: 1;
+            }
+        }
+    }
+
     .hotkey {
         display: flex;
         justify-content: space-between;
@@ -242,9 +279,6 @@ const Style = styled.div`
 FFmpeg.createFFmpeg({ log: true }).load();
 
 export default function Header({
-    player,
-    waveform,
-    newSub,
     undoSubs,
     clearSubs,
     language,
@@ -252,10 +286,28 @@ export default function Header({
     setLoading,
     formatSub,
     setSubtitle,
-    setProcessing,
     notify,
+    translate,
+    setTranslate,
+
+    viewEng,
+    setViewEng,
 }) {
-    const [translate, setTranslate] = useState('en');
+    const [anchorEl, setAnchorEl] = React.useState(null);
+
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
+    const open = Boolean(anchorEl);
+    const id = open ? 'simple-popover' : undefined;
+
+    const [tempTranslate, setTempTranslate] = useState(translate);
+    const [exportValue, setExportValue] = useState('SRT');
 
     const downloadSub = useCallback(
         (type) => {
@@ -263,16 +315,16 @@ export default function Header({
             const name = `${Date.now()}.${type}`;
             switch (type) {
                 case 'vtt':
-                    text = sub2vtt(subtitle);
+                    text = sub2vtt(subtitle, viewEng);
                     break;
                 case 'srt':
-                    text = sub2srt(subtitle);
+                    text = sub2srt(subtitle, viewEng);
                     break;
                 case 'ass':
-                    text = sub2ass(subtitle);
+                    text = sub2ass(subtitle, viewEng);
                     break;
                 case 'txt':
-                    text = sub2txt(subtitle);
+                    text = sub2txt(subtitle, viewEng);
                     break;
                 case 'json':
                     text = JSON.stringify(subtitle);
@@ -283,19 +335,22 @@ export default function Header({
             const url = URL.createObjectURL(new Blob([text]));
             download(url, name);
         },
-        [subtitle],
+        [subtitle, viewEng],
     );
 
     const onTranslate = useCallback(() => {
+        window.localStorage.setItem('lang', JSON.stringify(tempTranslate));
+        setTranslate(tempTranslate);
         setLoading(t('TRANSLATING'));
-        googleTranslate(formatSub(subtitle), translate)
+        googleTranslate(formatSub(subtitle), tempTranslate)
             .then((res) => {
-                setLoading('');
                 setSubtitle(formatSub(res));
                 notify({
                     message: t('TRANSLAT_SUCCESS'),
                     level: 'success',
                 });
+
+                setLoading('');
             })
             .catch((err) => {
                 setLoading('');
@@ -304,19 +359,50 @@ export default function Header({
                     level: 'error',
                 });
             });
-    }, [subtitle, setLoading, formatSub, setSubtitle, translate, notify]);
+    }, [subtitle, setLoading, formatSub, setSubtitle, tempTranslate, setTranslate, notify]);
 
     return (
         <Style className="tool">
             <div className="top">
-                <div className="export">
-                    <div className="btn" onClick={() => downloadSub('srt')}>
-                        <Translate value="EXPORT_SRT" />
+                <div className="toggle" style={{ display: 'flex', justifyContent: 'left', marginLeft: '10px' }}>
+                    <div>
+                        <Button
+                            aria-describedby={id}
+                            variant="outlined"
+                            onClick={handleClick}
+                            style={{ color: '#009688', borderColor: '#009688' }}
+                        >
+                            View Shortcuts
+                        </Button>
+                        <Popover
+                            id={id}
+                            open={open}
+                            anchorEl={anchorEl}
+                            onClose={handleClose}
+                            anchorOrigin={{
+                                vertical: 'bottom',
+                                horizontal: 'left',
+                            }}
+                        >
+                            <Typography sx={{ p: 2 }}>Play/Pause Video: Spacebar</Typography>
+                            <Typography sx={{ p: 2 }}>Undo: Ctrl + Z</Typography>
+                            <Typography sx={{ p: 2 }}>Copy: Ctrl + C</Typography>
+                            <Typography sx={{ p: 2 }}>Paste: Ctrl + V</Typography>
+                        </Popover>
                     </div>
-                    <div className="btn" onClick={() => downloadSub('vtt')}>
-                        <Translate value="EXPORT_VTT" />
-                    </div>
+
+                    <label style={{ color: '#FFF', marginLeft: '10px', marginRight: '5px' }}>
+                        Use Original Subtitles?
+                    </label>
+                    <input
+                        type="checkbox"
+                        onChange={() => {
+                            setViewEng(!viewEng);
+                        }}
+                        autoComplete="off"
+                    />
                 </div>
+
                 <div className="operate">
                     <div
                         className="btn"
@@ -398,8 +484,35 @@ export default function Header({
                         <Translate value="Save" />
                     </div>
                 </div>
+
+                <div className="export1">
+                    <select
+                        name="cars"
+                        id="cars"
+                        onChange={(e) => {
+                            setExportValue(e.target.value);
+                        }}
+                    >
+                        <option value="SRT">Export SRT</option>
+                        <option value="VTT">Export VTT</option>
+                    </select>
+
+                    <div
+                        className="btn"
+                        onClick={(e) => {
+                            if (exportValue === 'SRT') {
+                                downloadSub('srt');
+                            } else if (exportValue === 'VTT') {
+                                downloadSub('vtt');
+                            }
+                        }}
+                    >
+                        <Translate value="Export" />
+                    </div>
+                </div>
+
                 <div className="translate">
-                    <select value={translate} onChange={(event) => setTranslate(event.target.value)}>
+                    <select value={tempTranslate} onChange={(event) => setTempTranslate(event.target.value)}>
                         {(languages[language] || languages.en).map((item) => (
                             <option key={item.key} value={item.key}>
                                 {item.name}
@@ -409,14 +522,6 @@ export default function Header({
                     <div className="btn" onClick={onTranslate}>
                         <Translate value="TRANSLATE" />
                     </div>
-                </div>
-                <div className="hotkey">
-                    <span>
-                        <Translate value="HOTKEY_01" />
-                    </span>
-                    <span>
-                        <Translate value="HOTKEY_02" />
-                    </span>
                 </div>
             </div>
         </Style>
