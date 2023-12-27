@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import Subtitles from './folders/Subtitles';
 import Player from './folders/Player';
 import Footer from './folders/Footer';
+import Tool from './folders/Tool';
 import Loading from './folders/Loading';
 import ProgressBar from './folders/ProgressBar';
 import { getKeyCode } from './utils';
@@ -19,11 +20,11 @@ const Style = styled.div`
 
     .main {
         display: flex;
-        height: calc(100% - 200px);
+        height: calc(100% - 280px);
 
         .player {
             flex: 3;
-            width: 1000px;
+            width: 700px;
         }
 
         .subtitles {
@@ -51,7 +52,7 @@ export default function VideoPlayerApp({ defaultLang }) {
     const [currentIndex, setCurrentIndex] = useState(-1);
     const [translate, setTranslate] = useState('en');
     const [directUrl, setDirectUrl] = useState(null);
-    const [viewEng, setViewEng] = useState(true);
+    const [viewEng, setViewEng] = useState(false);
 
     const newSub = useCallback((item) => new Sub(item), []);
     const hasSub = useCallback((sub) => subtitle.indexOf(sub), [subtitle]);
@@ -373,6 +374,7 @@ export default function VideoPlayerApp({ defaultLang }) {
         <>
             <GlobalStyle />
             <Style>
+                <Tool {...props} />
                 <div className="main">
                     <Player {...props} />
                     <Subtitles {...props} />
