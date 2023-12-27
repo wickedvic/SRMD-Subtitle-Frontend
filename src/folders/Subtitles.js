@@ -3,6 +3,8 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { Table } from 'react-virtualized';
 import unescape from 'lodash/unescape';
 import debounce from 'lodash/debounce';
+import DeleteIcon from '@mui/icons-material/Delete';
+import MergeIcon from '@mui/icons-material/Merge';
 
 const Style = styled.div`
     position: relative;
@@ -67,8 +69,19 @@ const Style = styled.div`
     }
 `;
 
-export default function Subtitles({ currentIndex, subtitle, checkSub, player, updateSub, translate, sub }) {
+export default function Subtitles({
+    currentIndex,
+    subtitle,
+    checkSub,
+    player,
+    updateSub,
+    translate,
+    sub,
+    removeSub,
+    mergeSub,
+}) {
     const [height, setHeight] = useState(100);
+    // const [subDisable, setSubDisable] = useState(false);
 
     const resize = useCallback(() => {
         setHeight(document.body.clientHeight - 170);
@@ -88,7 +101,7 @@ export default function Subtitles({ currentIndex, subtitle, checkSub, player, up
             <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly' }}>
                     <div>Translated Text</div>
-                    <div>Original Text</div>
+                    <div style={{ marginLeft: '40px' }}>Original Text</div>
                 </div>
                 <Style className="subtitles">
                     <Table
@@ -116,6 +129,23 @@ export default function Subtitles({ currentIndex, subtitle, checkSub, player, up
                                     }}
                                 >
                                     <div className="item">
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                justifyContent: 'space-evenly',
+                                            }}
+                                        >
+                                            <DeleteIcon
+                                                style={{ fontSize: '18px', marginRight: '10px', cursor: 'pointer' }}
+                                                onClick={() => removeSub(props.rowData)}
+                                            />
+                                            <MergeIcon
+                                                style={{ fontSize: '18px', marginRight: '10px', cursor: 'pointer' }}
+                                                onClick={() => mergeSub(props.rowData)}
+                                            />
+                                        </div>
+
                                         <textarea
                                             maxLength={200}
                                             spellCheck={false}
