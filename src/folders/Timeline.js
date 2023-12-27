@@ -31,7 +31,7 @@ const Timeline = styled.div`
 
     .sub-item {
         position: absolute;
-        top: 30%;
+        top: 20%;
         left: 0;
         height: 40%;
         overflow: hidden;
@@ -74,6 +74,7 @@ const Timeline = styled.div`
         }
 
         .sub-text {
+            bottom: 20%;
             position: relative;
             z-index: 0;
             display: flex;
@@ -102,7 +103,17 @@ const Timeline = styled.div`
             position: absolute;
             left: 0;
             right: 0;
-            bottom: 0;
+            bottom: 15%;
+            width: 100%;
+            text-align: center;
+            font-size: 12px;
+        }
+        .sub-cps-cpl {
+            opacity: 0.5;
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -5%;
             width: 100%;
             text-align: center;
             font-size: 12px;
@@ -138,7 +149,7 @@ let lastDiffX = 0;
 let isDroging = false;
 
 export default React.memo(
-    function ({ player, subtitle, render, currentTime, checkSub, removeSub, hasSub, updateSub, mergeSub }) {
+    function ({ player, subtitle, render, currentTime, checkSub, removeSub, hasSub, updateSub, mergeSub, viewEng }) {
         const $blockRef = React.createRef();
         const $subsRef = React.createRef();
         const currentSubs = getCurrentSubs(subtitle, render.beginTime, render.duration);
@@ -321,12 +332,14 @@ export default React.memo(
 
                                     <div
                                         className="sub-text"
-                                        title={sub.text}
+                                        title={viewEng || !sub.text2 ? sub.text : sub.text2}
                                         onMouseDown={(event) => onMouseDown(sub, event)}
                                     >
-                                        {`${sub.text}`.split(/\r?\n/).map((line, index) => (
-                                            <p key={index}>{line}</p>
-                                        ))}
+                                        {`${viewEng || !sub.text2 ? sub.text : sub.text2}`
+                                            .split(/\r?\n/)
+                                            .map((line, index) => (
+                                                <p key={index}>{line}</p>
+                                            ))}
                                     </div>
 
                                     <div
@@ -337,8 +350,18 @@ export default React.memo(
                                         }}
                                         onMouseDown={(event) => onMouseDown(sub, event, 'right')}
                                     ></div>
-                                    <div className="sub-duration">{sub.duration}</div>
+                                    <div className="sub-duration">Duration: {sub.duration} seconds</div>
                                 </ContextMenuTrigger>
+
+                                {viewEng ? (
+                                    <div className="sub-cps-cpl">
+                                        {`CPS/CPL: ${(sub.text.length / sub.duration).toFixed(3)}/${sub.text.length}`}
+                                    </div>
+                                ) : (
+                                    <div className="sub-cps-cpl">
+                                        {`CPS/CPL: ${(sub.text2.length / sub.duration).toFixed(3)}/${sub.text2.length}`}
+                                    </div>
+                                )}
                             </div>
                         );
                     })}

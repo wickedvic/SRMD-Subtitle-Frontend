@@ -137,7 +137,7 @@ const Waveform = memo(
 
             setWaveform(waveform);
             waveform.on('update', setRender);
-            waveform.load('./silence.mp3');
+            waveform.load('/sample.mp3');
         }, [player, $waveform, setWaveform, setRender]);
 
         return <div className="waveform" ref={$waveform} />;
