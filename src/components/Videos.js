@@ -151,7 +151,7 @@ const Videos = () => {
                                         localStorage.removeItem('subtitle');
                                         localStorage.removeItem('timelineProps');
                                         localStorage.removeItem('checkedForDelete');
-
+                                        localStorage.removeItem('lang');
                                         localStorage.setItem('videoProps', JSON.stringify(props));
                                         // window.location.href = "/videos/edit";
                                     }}

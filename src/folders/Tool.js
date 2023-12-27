@@ -26,102 +26,10 @@ const Style = styled.div`
 
     border-left: 1px solid rgb(255 255 255 / 20%);
 
-    .import {
-        display: flex;
-        justify-content: space-between;
-        padding: 10px;
-        border-bottom: 1px solid rgb(255 255 255 / 20%);
-
-        .btn {
-            position: relative;
-            opacity: 0.85;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 35px;
-            width: 48%;
-            border-radius: 3px;
-            color: #fff;
-            cursor: pointer;
-            font-size: 13px;
-            background-color: #3f51b5;
-            transition: all 0.2s ease 0s;
-
-            &:hover {
-                opacity: 1;
-            }
-        }
-
-        .file {
-            position: absolute;
-            left: 0;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-        }
-    }
-
-    .burn {
-        display: flex;
-        justify-content: space-between;
-        padding: 10px;
-        border-bottom: 1px solid rgb(255 255 255 / 20%);
-
-        .btn {
-            position: relative;
-            opacity: 0.85;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 35px;
-            width: 100%;
-            border-radius: 3px;
-            color: #fff;
-            cursor: pointer;
-            font-size: 13px;
-            background-color: #673ab7;
-            transition: all 0.2s ease 0s;
-
-            &:hover {
-                opacity: 1;
-            }
-        }
-    }
-
-    .export {
-        display: flex;
-        justify-content: space-around;
-        padding: 10px;
-        border-bottom: 1px solid rgb(255 255 255 / 20%);
-
-        .btn {
-            position: relative;
-            opacity: 0.85;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 35px;
-            width: 45%;
-            border-radius: 3px;
-            color: #fff;
-            cursor: pointer;
-            font-size: 13px;
-            background-color: #009688;
-            transition: all 0.2s ease 0s;
-
-            &:hover {
-                opacity: 1;
-            }
-        }
-    }
-
     .operate {
         display: flex;
-        justify-content: space-between;
-        padding: 10px;
+        justify-content: right;
+        padding: 5px;
         border-bottom: 1px solid rgb(255 255 255 / 20%);
 
         .btn {
@@ -131,148 +39,17 @@ const Style = styled.div`
             justify-content: center;
             align-items: center;
             height: 35px;
-            width: 30%;
+            width: 5%;
             border-radius: 3px;
             color: #fff;
             cursor: pointer;
             font-size: 13px;
             background-color: #009688;
             transition: all 0.2s ease 0s;
-
+            margin-right: 10px;
             &:hover {
                 opacity: 1;
             }
-        }
-    }
-
-    .translate {
-        display: flex;
-        justify-content: space-between;
-        padding: 10px;
-        border-bottom: 1px solid rgb(255 255 255 / 20%);
-
-        select {
-            width: 65%;
-            outline: none;
-            padding: 0 5px;
-            border-radius: 3px;
-        }
-
-        .btn {
-            opacity: 0.85;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 35px;
-            width: 33%;
-            border-radius: 3px;
-            color: #fff;
-            cursor: pointer;
-            font-size: 13px;
-            background-color: #673ab7;
-            transition: all 0.2s ease 0s;
-
-            &:hover {
-                opacity: 1;
-            }
-        }
-    }
-
-    .export1 {
-        display: flex;
-        justify-content: space-between;
-        padding: 10px;
-        border-bottom: 1px solid rgb(255 255 255 / 20%);
-
-        select {
-            width: 65%;
-            outline: none;
-            padding: 0 5px;
-            border-radius: 3px;
-        }
-
-        .btn {
-            opacity: 0.85;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 35px;
-            width: 33%;
-            border-radius: 3px;
-            color: #fff;
-            cursor: pointer;
-            font-size: 13px;
-            background-color: #673ab7;
-            transition: all 0.2s ease 0s;
-
-            &:hover {
-                opacity: 1;
-            }
-        }
-    }
-
-    .hotkey {
-        display: flex;
-        justify-content: space-between;
-        padding: 10px;
-        line-height: 0px;
-        span {
-            width: 49%;
-            font-size: 13px;
-            padding: 20px 0;
-            border-radius: 3px;
-            text-align: center;
-            color: rgb(255 255 255 / 75%);
-            background-color: rgb(255 255 255 / 20%);
-        }
-    }
-
-    .bottom {
-        padding: 10px;
-        a {
-            display: flex;
-            flex-direction: column;
-            border: 1px solid rgb(255 255 255 / 30%);
-            text-decoration: none;
-
-            .title {
-                color: #ffeb3b;
-                padding: 5px 10px;
-                animation: animation 3s infinite;
-                border-bottom: 1px solid rgb(255 255 255 / 30%);
-            }
-
-            @keyframes animation {
-                50% {
-                    color: #00bcd4;
-                }
-            }
-
-            img {
-                max-width: 100%;
-            }
-        }
-    }
-
-    .progress {
-        position: fixed;
-        left: 0;
-        top: 0;
-        right: 0;
-        z-index: 9;
-        height: 2px;
-        background-color: rgb(0 0 0 / 50%);
-
-        span {
-            display: inline-block;
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 0;
-            height: 100%;
-            background-color: #ff9800;
-            transition: all 0.2s ease 0s;
         }
     }
 `;
@@ -365,61 +142,140 @@ export default function Header({
     return (
         <Style className="tool">
             <div className="top">
-                <div className="toggle" style={{ display: 'flex', justifyContent: 'left', marginLeft: '10px' }}>
-                    <div>
-                        <Button
-                            aria-describedby={id}
-                            variant="outlined"
-                            onClick={handleClick}
-                            style={{ color: '#009688', borderColor: '#009688' }}
-                        >
-                            View Shortcuts
-                        </Button>
-                        <Popover
-                            id={id}
-                            open={open}
-                            anchorEl={anchorEl}
-                            onClose={handleClose}
-                            anchorOrigin={{
-                                vertical: 'bottom',
-                                horizontal: 'left',
-                            }}
-                        >
-                            <Typography sx={{ p: 2 }}>Play/Pause Video: Spacebar</Typography>
-                            <Typography sx={{ p: 2 }}>Undo: Ctrl + Z </Typography>
-                            <Typography sx={{ p: 2 }}>Copy: Ctrl + C</Typography>
-                            <Typography sx={{ p: 2 }}>Paste: Ctrl + V</Typography>
-                            <Typography sx={{ p: 2 }}>New Subtitle: Drag on timeline</Typography>
-                            <Typography sx={{ p: 2 }}>
-                                Delete Subtitle: Trash icon or right click timeline subtitle
-                            </Typography>
-                            <Typography sx={{ p: 2 }}>
-                                Merge Subtitle: Merge icon or right click timeline subtitle
-                            </Typography>
+                <div className="operate">
+                    <div className="toggle" style={{ display: 'flex', justifyContent: 'left', marginLeft: '10px' }}>
+                        <div>
+                            <Button
+                                aria-describedby={id}
+                                variant="outlined"
+                                onClick={handleClick}
+                                style={{ color: '#009688', borderColor: '#009688' }}
+                            >
+                                View Shortcuts
+                            </Button>
+                            <Popover
+                                id={id}
+                                open={open}
+                                anchorEl={anchorEl}
+                                onClose={handleClose}
+                                anchorOrigin={{
+                                    vertical: 'bottom',
+                                    horizontal: 'left',
+                                }}
+                            >
+                                <Typography sx={{ p: 2 }}>
+                                    <b>Play/Pause Video:</b> Spacebar
+                                </Typography>
+                                <Typography sx={{ p: 2 }}>
+                                    {' '}
+                                    <b>Undo:</b> Ctrl + Z{' '}
+                                </Typography>
+                                <Typography sx={{ p: 2 }}>
+                                    {' '}
+                                    <b>Copy:</b> Ctrl + C
+                                </Typography>
+                                <Typography sx={{ p: 2 }}>
+                                    {' '}
+                                    <b>Paste:</b> Ctrl + V
+                                </Typography>
+                                <Typography sx={{ p: 2 }}>
+                                    {' '}
+                                    <b>Transition From One Textbox To Another:</b> Tab
+                                </Typography>
+                                <Typography sx={{ p: 2 }}>
+                                    {' '}
+                                    <b>New Subtitle:</b> Drag on timeline
+                                </Typography>
+                                <Typography sx={{ p: 2 }}>
+                                    <b>Delete Subtitle:</b> Trash icon or right click timeline subtitle
+                                </Typography>
+                                <Typography sx={{ p: 2 }}>
+                                    <b>Merge Subtitle:</b> Merge icon or right click timeline subtitle
+                                </Typography>
 
-                            <Typography sx={{ p: 2 }}>
-                                Change Subtitle View: Click checkbox to see translated text/original text. Will render
-                                on video and timeline. As well as what is exported
-                            </Typography>
-                        </Popover>
+                                <Typography sx={{ p: 2 }}>
+                                    <b>Change Subtitle View (Once User Clicks Translation):</b> Click checkbox to see
+                                    translated text/original text. Will render on video and timeline. As well as what is
+                                    exported
+                                </Typography>
+                            </Popover>
+                        </div>
+
+                        {window.localStorage.getItem('lang') === null ? null : (
+                            <>
+                                <label style={{ color: '#FFF', marginLeft: '20px' }}>Use Translated Text?</label>
+
+                                <Checkbox
+                                    onChange={() => {
+                                        setViewEng(!viewEng);
+                                    }}
+                                    style={{ color: '#FFF', bottom: '3px' }}
+                                />
+                            </>
+                        )}
                     </div>
 
-                    <label style={{ color: '#FFF', marginLeft: '20px' }}>Use Original Text?</label>
-
-                    <Checkbox
-                        onChange={() => {
-                            setViewEng(!viewEng);
+                    <select
+                        style={{
+                            width: '15%',
+                            marginRight: '10px',
+                            height: '35px',
+                            minHeight: '35px',
+                            marginLeft: 'auto',
                         }}
-                        style={{ color: '#FFF', bottom: '3px' }}
-                    />
-                </div>
+                        value={tempTranslate}
+                        onChange={(event) => setTempTranslate(event.target.value)}
+                    >
+                        {(languages[language] || languages.en).map((item) => (
+                            <option key={item.key} value={item.key}>
+                                {item.name}
+                            </option>
+                        ))}
+                    </select>
+                    <div style={{ backgroundColor: '#673ab7', width: '10%' }} className="btn" onClick={onTranslate}>
+                        <Translate value="TRANSLATE" />
+                    </div>
 
-                <div className="operate">
+                    <select
+                        style={{
+                            width: '15%',
+                            marginRight: '10px',
+                            height: '35px',
+                            minHeight: '35px',
+                            marginLeft: '1%',
+                        }}
+                        name="cars"
+                        id="cars"
+                        onChange={(e) => {
+                            setExportValue(e.target.value);
+                        }}
+                    >
+                        <option value="SRT">Export SRT</option>
+                        <option value="VTT">Export VTT</option>
+                    </select>
+
                     <div
+                        style={{ backgroundColor: '#673ab7', width: '10%' }}
+                        className="btn"
+                        onClick={(e) => {
+                            if (exportValue === 'SRT') {
+                                downloadSub('srt');
+                            } else if (exportValue === 'VTT') {
+                                downloadSub('vtt');
+                            }
+                        }}
+                    >
+                        <Translate value="Export" />
+                    </div>
+
+                    <div
+                        style={{ marginLeft: '2%' }}
                         className="btn"
                         onClick={() => {
                             if (window.confirm(t('CLEAR_TIP')) === true) {
                                 clearSubs();
+
+                                localStorage.removeItem('lang');
                                 window.location.reload();
                             }
                         }}
@@ -452,7 +308,7 @@ export default function Header({
                                             identifier: '',
                                             start: subtitle.start.split(':').reduce((acc, time) => 60 * acc + +time),
                                             end: subtitle.end.split(':').reduce((acc, time) => 60 * acc + +time),
-                                            text: subtitle.text,
+                                            text: subtitle.text2,
                                             styles: 'line:13 position:50% align:center size:80%',
                                         };
                                         parsedSubtitle.cues.push(cue);
@@ -511,44 +367,9 @@ export default function Header({
                     </div>
                 </div>
 
-                <div className="export1">
-                    <select
-                        name="cars"
-                        id="cars"
-                        onChange={(e) => {
-                            setExportValue(e.target.value);
-                        }}
-                    >
-                        <option value="SRT">Export SRT</option>
-                        <option value="VTT">Export VTT</option>
-                    </select>
-
-                    <div
-                        className="btn"
-                        onClick={(e) => {
-                            if (exportValue === 'SRT') {
-                                downloadSub('srt');
-                            } else if (exportValue === 'VTT') {
-                                downloadSub('vtt');
-                            }
-                        }}
-                    >
-                        <Translate value="Export" />
-                    </div>
-                </div>
-
-                <div className="translate">
-                    <select value={tempTranslate} onChange={(event) => setTempTranslate(event.target.value)}>
-                        {(languages[language] || languages.en).map((item) => (
-                            <option key={item.key} value={item.key}>
-                                {item.name}
-                            </option>
-                        ))}
-                    </select>
-                    <div className="btn" onClick={onTranslate}>
-                        <Translate value="TRANSLATE" />
-                    </div>
-                </div>
+                {/* <div className="translate-export">
+                  
+                </div> */}
             </div>
         </Style>
     );

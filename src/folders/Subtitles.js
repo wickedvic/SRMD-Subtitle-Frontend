@@ -19,6 +19,7 @@ const Style = styled.div`
         .ReactVirtualized__Table__row {
             .item {
                 height: 100%;
+                width: 100%;
                 padding: 5px;
                 display: flex;
                 flex: 1 1 0%;
@@ -79,9 +80,9 @@ export default function Subtitles({
     sub,
     removeSub,
     mergeSub,
+    viewEng,
 }) {
     const [height, setHeight] = useState(100);
-    // const [subDisable, setSubDisable] = useState(false);
 
     const resize = useCallback(() => {
         setHeight(document.body.clientHeight - 170);
@@ -99,16 +100,27 @@ export default function Subtitles({
     return (
         <>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly' }}>
-                    <div>Translated Text</div>
-                    <div style={{ marginLeft: '40px' }}>Original Text</div>
+                <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                    {window.localStorage.getItem('lang') === null ? (
+                        <>
+                            <div style={{ marginLeft: '9%' }}>CPS/CPL</div>
+
+                            <div style={{ marginRight: '35%' }}>Original Text</div>
+                        </>
+                    ) : (
+                        <>
+                            <div style={{ marginLeft: '6%' }}>CPS/CPL</div>
+                            <div style={{ marginRight: '18%' }}>Translated Text</div>
+                            <div style={{ marginRight: '18%' }}>Original Text</div>
+                        </>
+                    )}
                 </div>
                 <Style className="subtitles">
                     <Table
-                        headerHeight={40}
-                        width={450}
+                        headerHeight={20}
+                        width={750}
                         height={height}
-                        rowHeight={80}
+                        rowHeight={100}
                         scrollToIndex={currentIndex}
                         rowCount={subtitle.length}
                         rowGetter={({ index }) => subtitle[index]}
@@ -147,7 +159,12 @@ export default function Subtitles({
                                         </div>
 
                                         <textarea
-                                            maxLength={200}
+                                            disabled={true}
+                                            style={{
+                                                width: '150px',
+                                                textAlign: 'center',
+                                                paddingTop: '35px',
+                                            }}
                                             spellCheck={false}
                                             className={[
                                                 'textarea',
@@ -156,7 +173,15 @@ export default function Subtitles({
                                             ]
                                                 .join(' ')
                                                 .trim()}
-                                            value={unescape(props.rowData.text)}
+                                            value={
+                                                viewEng
+                                                    ? `${(props.rowData.text.length / props.rowData.duration).toFixed(
+                                                          0,
+                                                      )} / ${props.rowData.text.length}`
+                                                    : `${(props.rowData.text2.length / props.rowData.duration).toFixed(
+                                                          0,
+                                                      )} / ${props.rowData.text2.length}`
+                                            }
                                             onChange={(event) => {
                                                 updateSub(props.rowData, {
                                                     text: event.target.value,
@@ -164,8 +189,26 @@ export default function Subtitles({
                                             }}
                                         />
 
+                                        {window.localStorage.getItem('lang') === null ? null : (
+                                            <textarea
+                                                spellCheck={false}
+                                                className={[
+                                                    'textarea',
+                                                    currentIndex === props.index ? 'highlight' : '',
+                                                    checkSub(props.rowData) ? 'illegal' : '',
+                                                ]
+                                                    .join(' ')
+                                                    .trim()}
+                                                value={unescape(props.rowData.text)}
+                                                onChange={(event) => {
+                                                    updateSub(props.rowData, {
+                                                        text: event.target.value,
+                                                    });
+                                                }}
+                                            />
+                                        )}
+
                                         <textarea
-                                            maxLength={200}
                                             spellCheck={false}
                                             className={[
                                                 'textarea',
