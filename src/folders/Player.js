@@ -6,8 +6,6 @@ import styled from 'styled-components';
 
 import { isPlaying } from '../utils';
 
-import Tool from './Tool';
-
 const Style = styled.div`
     display: flex;
     align-items: center;
@@ -232,8 +230,6 @@ export default function Player(props) {
                         ) : null}
                     </div>
                 </Style>
-
-                <Tool {...props} />
             </div>
         </>
     );

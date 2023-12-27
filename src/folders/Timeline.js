@@ -103,7 +103,7 @@ const Timeline = styled.div`
             position: absolute;
             left: 0;
             right: 0;
-            bottom: 15%;
+            bottom: 0;
             width: 100%;
             text-align: center;
             font-size: 12px;
@@ -352,16 +352,6 @@ export default React.memo(
                                     ></div>
                                     <div className="sub-duration">Duration: {sub.duration} seconds</div>
                                 </ContextMenuTrigger>
-
-                                {viewEng ? (
-                                    <div className="sub-cps-cpl">
-                                        {`CPS/CPL: ${(sub.text.length / sub.duration).toFixed(3)}/${sub.text.length}`}
-                                    </div>
-                                ) : (
-                                    <div className="sub-cps-cpl">
-                                        {`CPS/CPL: ${(sub.text2.length / sub.duration).toFixed(3)}/${sub.text2.length}`}
-                                    </div>
-                                )}
                             </div>
                         );
                     })}
