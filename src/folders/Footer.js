@@ -40,8 +40,8 @@ const Style = styled.div`
                 right: 0;
                 top: 0;
                 bottom: 0;
-                width: 10px;
-                cursor: ew-resize;
+                width: 20px;
+                cursor: pointer;
                 background-color: #ff9800;
             }
         }
@@ -137,7 +137,8 @@ const Waveform = memo(
 
             setWaveform(waveform);
             waveform.on('update', setRender);
-            waveform.load('/sample.mp3');
+            // waveform.load(document.querySelector('#videoPlayer'));
+            waveform.load('./silence.mp3');
         }, [player, $waveform, setWaveform, setRender]);
 
         return <div className="waveform" ref={$waveform} />;
