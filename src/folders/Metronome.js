@@ -82,7 +82,8 @@ export default function Component({ render, subtitle, newSub, addSub, player, pl
                     newSub({
                         start,
                         end,
-                        text: t('SUB_TEXT'),
+                        text: t(''),
+                        text2: t(''),
                     }),
                 );
             }

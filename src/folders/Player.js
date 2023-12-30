@@ -137,7 +137,14 @@ const VideoWrap = memo(
         const videoProps = JSON.parse(localStorage.getItem('videoProps'));
         return (
             <>
-                <video onClick={onClick} src={`${videoProps.videoUrl}`} ref={$video} controls={true} />
+                <video
+                    id="videoPlayer"
+                    className="#videoPlayer"
+                    onClick={onClick}
+                    src={`${videoProps.videoUrl}`}
+                    ref={$video}
+                    controls
+                />
             </>
         );
     },
