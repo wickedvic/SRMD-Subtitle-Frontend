@@ -174,13 +174,20 @@ export default function Subtitles({
                                                 .join(' ')
                                                 .trim()}
                                             value={
-                                                viewEng
-                                                    ? `${(props.rowData.text.length / props.rowData.duration).toFixed(
-                                                          0,
-                                                      )} / ${props.rowData.text.length}`
-                                                    : `${(props.rowData.text2.length / props.rowData.duration).toFixed(
-                                                          0,
-                                                      )} / ${props.rowData.text2.length}`
+                                                props?.rowData?.text === undefined ||
+                                                props?.rowData?.text2 === undefined
+                                                    ? '0/0'
+                                                    : viewEng
+                                                    ? `${(
+                                                          props?.rowData?.text?.length / props?.rowData?.duration
+                                                      ).toFixed(0)} / ${props?.rowData?.text
+                                                          ?.split('\n')
+                                                          ?.map((e) => e.length)}`
+                                                    : `${(
+                                                          props?.rowData?.text2?.length / props?.rowData?.duration
+                                                      ).toFixed(0)} / ${props?.rowData?.text2
+                                                          ?.split('\n')
+                                                          ?.map((e) => e.length)}`
                                             }
                                             onChange={(event) => {
                                                 updateSub(props.rowData, {
@@ -191,7 +198,7 @@ export default function Subtitles({
 
                                         {window.localStorage.getItem('lang') === null ? null : (
                                             <textarea
-                                                spellCheck={false}
+                                                spellcheck="true"
                                                 className={[
                                                     'textarea',
                                                     currentIndex === props.index ? 'highlight' : '',
@@ -209,7 +216,7 @@ export default function Subtitles({
                                         )}
 
                                         <textarea
-                                            spellCheck={false}
+                                            spellcheck="true"
                                             className={[
                                                 'textarea',
                                                 currentIndex === props.index ? 'highlight' : '',

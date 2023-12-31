@@ -164,23 +164,31 @@ export default function Header({
                                 }}
                             >
                                 <Typography sx={{ p: 2 }}>
-                                    <b>Play/Pause Video:</b> Spacebar
+                                    <b>Play/Pause Video:</b> Tab (Outside Textbox)
+                                </Typography>
+                                <Typography sx={{ p: 2 }}>
+                                    <b>Show Video Controls:</b> Right Click On Video And Click Show Controls (Playback
+                                    Speed, Volume, Etc)
                                 </Typography>
                                 <Typography sx={{ p: 2 }}>
                                     {' '}
-                                    <b>Undo:</b> Ctrl + Z{' '}
+                                    <b>Undo:</b> Cmd + Z{' '}
                                 </Typography>
                                 <Typography sx={{ p: 2 }}>
                                     {' '}
-                                    <b>Copy:</b> Ctrl + C
+                                    <b>Copy:</b> Cmd + C
                                 </Typography>
                                 <Typography sx={{ p: 2 }}>
                                     {' '}
-                                    <b>Paste:</b> Ctrl + V
+                                    <b>Paste:</b> Cmd + V
                                 </Typography>
                                 <Typography sx={{ p: 2 }}>
                                     {' '}
-                                    <b>Transition From One Textbox To Another:</b> Tab
+                                    <b>Transition Down From One Textbox To Another:</b> Tab (Within Textbox)
+                                </Typography>
+                                <Typography sx={{ p: 2 }}>
+                                    {' '}
+                                    <b>Transition Up From One Textbox To Another:</b> Shift + Tab
                                 </Typography>
                                 <Typography sx={{ p: 2 }}>
                                     {' '}
@@ -366,10 +374,6 @@ export default function Header({
                         <Translate value="Save" />
                     </div>
                 </div>
-
-                {/* <div className="translate-export">
-                  
-                </div> */}
             </div>
         </Style>
     );

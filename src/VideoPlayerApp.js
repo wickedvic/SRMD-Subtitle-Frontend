@@ -253,7 +253,7 @@ export default function VideoPlayerApp({ defaultLang }) {
         (event) => {
             const keyCode = getKeyCode(event);
             switch (keyCode) {
-                case 32:
+                case 9:
                     event.preventDefault();
                     if (player) {
                         if (playing) {
@@ -379,6 +379,7 @@ export default function VideoPlayerApp({ defaultLang }) {
                     <Player {...props} />
                     <Subtitles {...props} />
                 </div>
+
                 <Footer {...props} />
                 {loading ? <Loading loading={loading} /> : null}
                 {processing > 0 && processing < 100 ? <ProgressBar processing={processing} /> : null}
