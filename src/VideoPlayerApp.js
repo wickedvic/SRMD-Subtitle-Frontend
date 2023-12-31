@@ -13,9 +13,6 @@ import { getKeyCode } from './utils';
 import Sub from './libs/Sub';
 import GlobalStyle from './GlobalStyle';
 import WebVTT from 'node-webvtt';
-import { t } from 'react-i18nify';
-import axios from 'axios';
-import Swal from 'sweetalert2';
 
 const Style = styled.div`
     height: 100%;
@@ -255,7 +252,6 @@ export default function VideoPlayerApp({ defaultLang }) {
     const onKeyDown = useCallback(
         (event) => {
             const keyCode = getKeyCode(event);
-            console.log(keyCode);
             switch (keyCode) {
                 case 9:
                     event.preventDefault();
@@ -273,86 +269,11 @@ export default function VideoPlayerApp({ defaultLang }) {
                         undoSubs();
                     }
                     break;
-
-                case 83:
-                    event.preventDefault();
-                    if (event.metaKey) {
-                        Swal.fire({
-                            title: 'Do you want to save changes?',
-                            showDenyButton: true,
-                            showCancelButton: true,
-                            confirmButtonText: 'Save',
-                            denyButtonText: `Don't save`,
-                        }).then((result) => {
-                            /* Read more about isConfirmed, isDenied below */
-                            if (result.isConfirmed) {
-                                setLoading(t('UPDATING'));
-                                const parsedSubtitle = {
-                                    cues: [],
-                                    valid: true,
-                                };
-                                subtitle.forEach((subtitle, index) => {
-                                    const cue = {
-                                        identifier: '',
-                                        start: subtitle.start.split(':').reduce((acc, time) => 60 * acc + +time),
-                                        end: subtitle.end.split(':').reduce((acc, time) => 60 * acc + +time),
-                                        text: subtitle.text2,
-                                        styles: 'line:13 position:50% align:center size:80%',
-                                    };
-                                    parsedSubtitle.cues.push(cue);
-                                });
-
-                                try {
-                                    const videoProps = JSON.parse(localStorage.getItem('videoProps'));
-                                    const modifiedSubtitleContent = WebVTT.compile(parsedSubtitle);
-
-                                    axios
-                                        .put(
-                                            `https://speechtotexteditor.azurewebsites.net/api/v1/videos/${videoProps.id}`,
-                                            {
-                                                subtitleString: btoa(modifiedSubtitleContent),
-                                            },
-                                        )
-                                        .then(function (response) {
-                                            setLoading('');
-
-                                            Swal.fire({
-                                                title: 'Success!',
-                                                text: 'Your changes have been saved!',
-                                                icon: 'success',
-                                                confirmButtonText: 'Close',
-                                            }).then((result) => {
-                                                if (result.isConfirmed) {
-                                                    localStorage.removeItem('subtitle');
-                                                    localStorage.setItem('videoProps', JSON.stringify(response.data));
-
-                                                    window.location.reload();
-                                                }
-                                            });
-                                        })
-                                        .catch(function (error) {
-                                            console.log(error);
-                                        });
-                                } catch (error) {
-                                    setLoading('');
-                                    Swal.fire({
-                                        title: 'Error!',
-                                        text: 'Subtitle Timings Overlap. Please fix and try again!',
-                                        icon: 'error',
-                                        confirmButtonText: 'Close',
-                                    });
-                                }
-                            } else if (result.isDenied) {
-                                Swal.fire('Changes are not saved', '', 'info');
-                            }
-                        });
-                    }
-                    break;
                 default:
                     break;
             }
         },
-        [player, playing, undoSubs, subtitle],
+        [player, playing, undoSubs],
     );
 
     useEffect(() => {
