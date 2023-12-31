@@ -184,6 +184,10 @@ export default function Header({
                                 </Typography>
                                 <Typography sx={{ p: 2 }}>
                                     {' '}
+                                    <b>Save:</b> Cmd + S
+                                </Typography>
+                                <Typography sx={{ p: 2 }}>
+                                    {' '}
                                     <b>Transition Down From One Textbox To Another:</b> Tab (Within Textbox)
                                 </Typography>
                                 <Typography sx={{ p: 2 }}>
