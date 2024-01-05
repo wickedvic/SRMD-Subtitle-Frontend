@@ -17,22 +17,17 @@ import WebVTT from 'node-webvtt';
 const Style = styled.div`
     height: 100%;
     width: 100%;
-
-    .main {
+    .container {
         display: flex;
         height: calc(100% - 280px);
-
-        .player {
-            flex: 3;
-            width: 700px;
+        .videoPlayer {
+            width: 600px;
+            height: calc((9 / 16) * 50vw);
         }
-
         .subtitles {
-            width: 100%;
-            overflow: scroll;
+            left: 5px;
         }
     }
-
     .footer {
         height: 200px;
     }
@@ -375,9 +370,14 @@ export default function VideoPlayerApp({ defaultLang }) {
             <GlobalStyle />
             <Style>
                 <Tool {...props} />
-                <div className="main">
-                    <Player {...props} />
-                    <Subtitles {...props} />
+                <div className="container">
+                    <div style={{ marginLeft: 'auto', marginRight: 'auto', marginTop: 'auto', marginBottom: 'auto' }}>
+                        <Player {...props} />
+                    </div>
+
+                    <div style={{ marginLeft: 'auto', overflow: 'scroll' }}>
+                        <Subtitles {...props} />
+                    </div>
                 </div>
 
                 <Footer {...props} />
