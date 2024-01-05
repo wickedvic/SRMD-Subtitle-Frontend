@@ -6,6 +6,8 @@ import debounce from 'lodash/debounce';
 import DeleteIcon from '@mui/icons-material/Delete';
 import MergeIcon from '@mui/icons-material/Merge';
 
+import BookmarkIcon from '@mui/icons-material/Bookmark';
+
 const Style = styled.div`
     position: relative;
     box-shadow: 0px 5px 25px 5px rgb(0 0 0 / 80%);
@@ -81,6 +83,8 @@ export default function Subtitles({
     removeSub,
     mergeSub,
     viewEng,
+    bookmarked,
+    setBookmarked,
 }) {
     const [height, setHeight] = useState(100);
 
@@ -96,6 +100,7 @@ export default function Subtitles({
             window.addEventListener('resize', debounceResize);
         }
     }, [resize]);
+    const videoProps = JSON.parse(localStorage.getItem('videoProps'));
 
     return (
         <>
@@ -148,13 +153,31 @@ export default function Subtitles({
                                                 justifyContent: 'space-evenly',
                                             }}
                                         >
-                                            <DeleteIcon
-                                                style={{ fontSize: '18px', marginRight: '10px', cursor: 'pointer' }}
-                                                onClick={() => removeSub(props.rowData)}
+                                            <BookmarkIcon
+                                                style={{
+                                                    fontSize: '19px',
+                                                    marginRight: '10px',
+                                                    cursor: 'pointer',
+                                                    color: bookmarked.includes(props.index) ? 'red' : null,
+                                                }}
+                                                onClick={() => {
+                                                    if (bookmarked.includes(props.index)) {
+                                                        const updatedArr = bookmarked.filter(
+                                                            (item) => item !== props.index,
+                                                        );
+                                                        setBookmarked(updatedArr);
+                                                    } else {
+                                                        setBookmarked((bookmarked) => [...bookmarked, props.index]);
+                                                    }
+                                                }}
                                             />
                                             <MergeIcon
-                                                style={{ fontSize: '18px', marginRight: '10px', cursor: 'pointer' }}
+                                                style={{ fontSize: '19px', marginRight: '10px', cursor: 'pointer' }}
                                                 onClick={() => mergeSub(props.rowData)}
+                                            />
+                                            <DeleteIcon
+                                                style={{ fontSize: '19px', marginRight: '10px', cursor: 'pointer' }}
+                                                onClick={() => removeSub(props.rowData)}
                                             />
                                         </div>
 
@@ -164,6 +187,7 @@ export default function Subtitles({
                                                 width: '150px',
                                                 textAlign: 'center',
                                                 paddingTop: '35px',
+                                                fontSize: '14px',
                                             }}
                                             spellCheck={false}
                                             className={[
@@ -196,8 +220,14 @@ export default function Subtitles({
                                             }}
                                         />
 
-                                        {window.localStorage.getItem('lang') === null ? null : (
+                                        {window.localStorage.getItem('lang') === null &&
+                                        (videoProps.translatedString === null ||
+                                            videoProps.translatedString === 'null' ||
+                                            videoProps.translatedString === ' ') ? null : (
                                             <textarea
+                                                style={{
+                                                    fontSize: '16px',
+                                                }}
                                                 spellcheck="true"
                                                 className={[
                                                     'textarea',
@@ -216,6 +246,9 @@ export default function Subtitles({
                                         )}
 
                                         <textarea
+                                            style={{
+                                                fontSize: '16px',
+                                            }}
                                             spellcheck="true"
                                             className={[
                                                 'textarea',

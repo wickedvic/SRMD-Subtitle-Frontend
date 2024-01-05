@@ -70,6 +70,8 @@ export default function Header({
 
     viewEng,
     setViewEng,
+
+    bookmarked,
 }) {
     const [anchorEl, setAnchorEl] = React.useState(null);
 
@@ -322,48 +324,121 @@ export default function Header({
                                         parsedSubtitle.cues.push(cue);
                                     });
 
-                                    try {
-                                        const videoProps = JSON.parse(localStorage.getItem('videoProps'));
-                                        const modifiedSubtitleContent = WebVTT.compile(parsedSubtitle);
+                                    const parsedSubtitleTrans = {
+                                        cues: [],
+                                        valid: true,
+                                    };
+                                    subtitle.forEach((subtitle, index) => {
+                                        const cue = {
+                                            identifier: '',
+                                            start: subtitle.start.split(':').reduce((acc, time) => 60 * acc + +time),
+                                            end: subtitle.end.split(':').reduce((acc, time) => 60 * acc + +time),
+                                            text: subtitle.text,
+                                            styles: 'line:13 position:50% align:center size:80%',
+                                        };
+                                        parsedSubtitleTrans.cues.push(cue);
+                                    });
 
-                                        axios
-                                            .put(
-                                                `https://speechtotexteditor.azurewebsites.net/api/v1/videos/${videoProps.id}`,
-                                                {
-                                                    subtitleString: btoa(modifiedSubtitleContent),
-                                                },
-                                            )
-                                            .then(function (response) {
-                                                setLoading('');
+                                    if (
+                                        parsedSubtitle.cues[0].text !== parsedSubtitleTrans.cues[0].text &&
+                                        parsedSubtitle.cues[1].text !== parsedSubtitleTrans.cues[1].text &&
+                                        parsedSubtitle.cues[2].text !== parsedSubtitleTrans.cues[2].text &&
+                                        parsedSubtitle.cues[3].text !== parsedSubtitleTrans.cues[3].text &&
+                                        parsedSubtitle.cues[4].text !== parsedSubtitleTrans.cues[4].text
+                                    ) {
+                                        try {
+                                            const videoProps = JSON.parse(localStorage.getItem('videoProps'));
+                                            const modifiedSubtitleContent = WebVTT.compile(parsedSubtitle);
+                                            const modifiedSubtitleContentTrans = WebVTT.compile(parsedSubtitleTrans);
 
-                                                Swal.fire({
-                                                    title: 'Success!',
-                                                    text: 'Your changes have been saved!',
-                                                    icon: 'success',
-                                                    confirmButtonText: 'Close',
-                                                }).then((result) => {
-                                                    if (result.isConfirmed) {
-                                                        localStorage.removeItem('subtitle');
-                                                        localStorage.setItem(
-                                                            'videoProps',
-                                                            JSON.stringify(response.data),
-                                                        );
+                                            axios
+                                                .put(
+                                                    `https://speechtotexteditor.azurewebsites.net/api/v1/videos/${videoProps.id}`,
+                                                    {
+                                                        subtitleString: btoa(modifiedSubtitleContent),
+                                                        metadataCheckFlag: JSON.stringify(bookmarked.sort()),
+                                                        translatedString: btoa(
+                                                            encodeURIComponent(modifiedSubtitleContentTrans),
+                                                        ),
+                                                    },
+                                                )
+                                                .then(function (response) {
+                                                    setLoading('');
 
-                                                        window.location.reload();
-                                                    }
+                                                    Swal.fire({
+                                                        title: 'Success!',
+                                                        text: 'Your changes have been saved!',
+                                                        icon: 'success',
+                                                        confirmButtonText: 'Close',
+                                                    }).then((result) => {
+                                                        if (result.isConfirmed) {
+                                                            localStorage.removeItem('subtitle');
+                                                            localStorage.setItem(
+                                                                'videoProps',
+                                                                JSON.stringify(response.data),
+                                                            );
+
+                                                            window.location.reload();
+                                                        }
+                                                    });
+                                                })
+                                                .catch(function (error) {
+                                                    console.log(error);
                                                 });
-                                            })
-                                            .catch(function (error) {
-                                                console.log(error);
+                                        } catch (error) {
+                                            setLoading('');
+                                            Swal.fire({
+                                                title: 'Error!',
+                                                text: 'Subtitle Timings Overlap. Please fix and try again!',
+                                                icon: 'error',
+                                                confirmButtonText: 'Close',
                                             });
-                                    } catch (error) {
-                                        setLoading('');
-                                        Swal.fire({
-                                            title: 'Error!',
-                                            text: 'Subtitle Timings Overlap. Please fix and try again!',
-                                            icon: 'error',
-                                            confirmButtonText: 'Close',
-                                        });
+                                        }
+                                    } else {
+                                        try {
+                                            const videoProps = JSON.parse(localStorage.getItem('videoProps'));
+                                            const modifiedSubtitleContent = WebVTT.compile(parsedSubtitle);
+
+                                            axios
+                                                .put(
+                                                    `https://speechtotexteditor.azurewebsites.net/api/v1/videos/${videoProps.id}`,
+                                                    {
+                                                        subtitleString: btoa(modifiedSubtitleContent),
+                                                        metadataCheckFlag: JSON.stringify(bookmarked.sort()),
+                                                    },
+                                                )
+                                                .then(function (response) {
+                                                    setLoading('');
+
+                                                    Swal.fire({
+                                                        title: 'Success!',
+                                                        text: 'Your changes have been saved!',
+                                                        icon: 'success',
+                                                        confirmButtonText: 'Close',
+                                                    }).then((result) => {
+                                                        if (result.isConfirmed) {
+                                                            localStorage.removeItem('subtitle');
+                                                            localStorage.setItem(
+                                                                'videoProps',
+                                                                JSON.stringify(response.data),
+                                                            );
+
+                                                            window.location.reload();
+                                                        }
+                                                    });
+                                                })
+                                                .catch(function (error) {
+                                                    console.log(error);
+                                                });
+                                        } catch (error) {
+                                            setLoading('');
+                                            Swal.fire({
+                                                title: 'Error!',
+                                                text: 'Subtitle Timings Overlap. Please fix and try again!',
+                                                icon: 'error',
+                                                confirmButtonText: 'Close',
+                                            });
+                                        }
                                     }
                                 } else if (result.isDenied) {
                                     Swal.fire('Changes are not saved', '', 'info');

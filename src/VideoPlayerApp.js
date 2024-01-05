@@ -49,6 +49,8 @@ export default function VideoPlayerApp({ defaultLang }) {
     const [directUrl, setDirectUrl] = useState(null);
     const [viewEng, setViewEng] = useState(false);
 
+    const [bookmarked, setBookmarked] = useState([]);
+
     const newSub = useCallback((item) => new Sub(item), []);
     const hasSub = useCallback((sub) => subtitle.indexOf(sub), [subtitle]);
 
@@ -291,37 +293,83 @@ export default function VideoPlayerApp({ defaultLang }) {
         const localSubtitleString = window.localStorage.getItem('subtitle');
 
         const videoProps = JSON.parse(localStorage.getItem('videoProps'));
-        const subtitleData = atob(videoProps.subtitleString);
 
-        const nodes = WebVTT.parse(subtitleData, { strict: false });
+        setBookmarked(JSON.parse(videoProps.metadataCheckFlag));
 
-        let timelineData = nodes.cues.map(({ start, end, text }) => {
-            return { start: toTime(start), end: toTime(end), text: text };
-        });
+        if (
+            videoProps.translatedString === null ||
+            videoProps.translatedString === 'null' ||
+            videoProps.translatedString === ' '
+        ) {
+            const subtitleData = atob(videoProps.subtitleString);
 
-        let cleanedData = timelineData.filter((res) => res.start !== res.end);
+            const nodes = WebVTT.parse(subtitleData, { strict: false });
 
-        const stateUpdated = cleanedData.map((item, index) => {
-            return {
-                ...item,
-                text2: cleanedData[index]?.text,
-            };
-        });
+            let timelineData = nodes.cues.map(({ start, end, text }) => {
+                return { start: toTime(start), end: toTime(end), text: text };
+            });
 
-        if (localSubtitleString) {
-            try {
-                const localSubtitle = JSON.parse(localSubtitleString);
+            let cleanedData = timelineData.filter((res) => res.start !== res.end);
 
-                if (localSubtitle.length) {
-                    setSubtitleOriginal(localSubtitle.map((item) => new Sub(item)));
-                } else {
+            const stateUpdated = cleanedData.map((item, index) => {
+                return {
+                    ...item,
+                    text2: cleanedData[index]?.text,
+                };
+            });
+
+            if (localSubtitleString) {
+                try {
+                    const localSubtitle = JSON.parse(localSubtitleString);
+
+                    if (localSubtitle.length) {
+                        setSubtitleOriginal(localSubtitle.map((item) => new Sub(item)));
+                    } else {
+                        setSubtitleOriginal(stateUpdated.map((item) => new Sub(item)));
+                    }
+                } catch (error) {
                     setSubtitleOriginal(stateUpdated.map((item) => new Sub(item)));
                 }
-            } catch (error) {
+            } else {
                 setSubtitleOriginal(stateUpdated.map((item) => new Sub(item)));
             }
         } else {
-            setSubtitleOriginal(stateUpdated.map((item) => new Sub(item)));
+            const subtitleData = atob(videoProps.subtitleString);
+            const translatedData = decodeURIComponent(atob(videoProps.translatedString));
+
+            const nodes = WebVTT.parse(subtitleData, { strict: false });
+            const nodesTranslated = WebVTT.parse(translatedData, { strict: false });
+
+            let timelineData = nodes.cues.map(({ start, end, text }) => {
+                return { start: toTime(start), end: toTime(end), text2: text };
+            });
+
+            let updatedTimelineData = nodesTranslated.cues.map(({ start, end, text }) => {
+                return { start: toTime(start), end: toTime(end), text: text };
+            });
+
+            var combinedArray = updatedTimelineData.map((obj, index) => ({
+                ...obj,
+                ...timelineData[index],
+            }));
+
+            let cleanedData = combinedArray.filter((res) => res.start !== res.end);
+
+            if (localSubtitleString) {
+                try {
+                    const localSubtitle = JSON.parse(localSubtitleString);
+
+                    if (localSubtitle.length) {
+                        setSubtitleOriginal(localSubtitle.map((item) => new Sub(item)));
+                    } else {
+                        setSubtitleOriginal(cleanedData.map((item) => new Sub(item)));
+                    }
+                } catch (error) {
+                    setSubtitleOriginal(cleanedData.map((item) => new Sub(item)));
+                }
+            } else {
+                setSubtitleOriginal(cleanedData.map((item) => new Sub(item)));
+            }
         }
     }, [setSubtitleOriginal]);
 
@@ -350,6 +398,8 @@ export default function VideoPlayerApp({ defaultLang }) {
         setDirectUrl,
         viewEng,
         setViewEng,
+        bookmarked,
+        setBookmarked,
 
         notify,
         newSub,
