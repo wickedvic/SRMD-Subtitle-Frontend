@@ -17,22 +17,17 @@ import WebVTT from 'node-webvtt';
 const Style = styled.div`
     height: 100%;
     width: 100%;
-
-    .main {
+    .container {
         display: flex;
         height: calc(100% - 280px);
-
-        .player {
-            flex: 3;
-            width: 700px;
+        .videoPlayer {
+            width: 600px;
+            height: calc((9 / 16) * 50vw);
         }
-
         .subtitles {
-            width: 100%;
-            overflow: scroll;
+            left: 5px;
         }
     }
-
     .footer {
         height: 200px;
     }
@@ -53,6 +48,10 @@ export default function VideoPlayerApp({ defaultLang }) {
     const [translate, setTranslate] = useState('en');
     const [directUrl, setDirectUrl] = useState(null);
     const [viewEng, setViewEng] = useState(false);
+
+    const [bookmarked, setBookmarked] = useState([]);
+
+    const [subtitleComment, setSubtitleComment] = useState([]);
 
     const newSub = useCallback((item) => new Sub(item), []);
     const hasSub = useCallback((sub) => subtitle.indexOf(sub), [subtitle]);
@@ -252,6 +251,7 @@ export default function VideoPlayerApp({ defaultLang }) {
     const onKeyDown = useCallback(
         (event) => {
             const keyCode = getKeyCode(event);
+
             switch (keyCode) {
                 case 9:
                     event.preventDefault();
@@ -263,6 +263,21 @@ export default function VideoPlayerApp({ defaultLang }) {
                         }
                     }
                     break;
+
+                case 39:
+                    event.preventDefault();
+                    if (player) {
+                        player.currentTime = player.currentTime + 3.0;
+                    }
+                    break;
+
+                case 37:
+                    event.preventDefault();
+                    if (player && player.currentTime > 3.0) {
+                        player.currentTime = player.currentTime - 3.0;
+                    }
+                    break;
+
                 case 90:
                     event.preventDefault();
                     if (event.metaKey) {
@@ -296,37 +311,90 @@ export default function VideoPlayerApp({ defaultLang }) {
         const localSubtitleString = window.localStorage.getItem('subtitle');
 
         const videoProps = JSON.parse(localStorage.getItem('videoProps'));
-        const subtitleData = atob(videoProps.subtitleString);
 
-        const nodes = WebVTT.parse(subtitleData, { strict: false });
+        if (videoProps.metadataCheckFlag.length > 0) {
+            setBookmarked(videoProps.metadataCheckFlag);
+        }
 
-        let timelineData = nodes.cues.map(({ start, end, text }) => {
-            return { start: toTime(start), end: toTime(end), text: text };
-        });
+        if (videoProps.metadataComments.length > 0) {
+            setSubtitleComment(videoProps.metadataComments);
+        }
 
-        let cleanedData = timelineData.filter((res) => res.start !== res.end);
+        if (
+            videoProps.translatedString === null ||
+            videoProps.translatedString === 'null' ||
+            videoProps.translatedString === ' ' ||
+            videoProps.translatedString === ''
+        ) {
+            const subtitleData = atob(videoProps.subtitleString);
 
-        const stateUpdated = cleanedData.map((item, index) => {
-            return {
-                ...item,
-                text2: cleanedData[index]?.text,
-            };
-        });
+            const nodes = WebVTT.parse(subtitleData, { strict: false });
 
-        if (localSubtitleString) {
-            try {
-                const localSubtitle = JSON.parse(localSubtitleString);
+            let timelineData = nodes.cues.map(({ start, end, text }) => {
+                return { start: toTime(start), end: toTime(end), text: text };
+            });
 
-                if (localSubtitle.length) {
-                    setSubtitleOriginal(localSubtitle.map((item) => new Sub(item)));
-                } else {
+            let cleanedData = timelineData.filter((res) => res.start !== res.end);
+
+            const stateUpdated = cleanedData.map((item, index) => {
+                return {
+                    ...item,
+                    text2: cleanedData[index]?.text,
+                };
+            });
+
+            if (localSubtitleString) {
+                try {
+                    const localSubtitle = JSON.parse(localSubtitleString);
+
+                    if (localSubtitle.length) {
+                        setSubtitleOriginal(localSubtitle.map((item) => new Sub(item)));
+                    } else {
+                        setSubtitleOriginal(stateUpdated.map((item) => new Sub(item)));
+                    }
+                } catch (error) {
                     setSubtitleOriginal(stateUpdated.map((item) => new Sub(item)));
                 }
-            } catch (error) {
+            } else {
                 setSubtitleOriginal(stateUpdated.map((item) => new Sub(item)));
             }
         } else {
-            setSubtitleOriginal(stateUpdated.map((item) => new Sub(item)));
+            const subtitleData = atob(videoProps.subtitleString);
+            const translatedData = decodeURIComponent(atob(videoProps.translatedString));
+
+            const nodes = WebVTT.parse(subtitleData, { strict: false });
+            const nodesTranslated = WebVTT.parse(translatedData, { strict: false });
+
+            let timelineData = nodes.cues.map(({ start, end, text }) => {
+                return { start: toTime(start), end: toTime(end), text2: text };
+            });
+
+            let updatedTimelineData = nodesTranslated.cues.map(({ start, end, text }) => {
+                return { start: toTime(start), end: toTime(end), text: text };
+            });
+
+            var combinedArray = updatedTimelineData.map((obj, index) => ({
+                ...obj,
+                ...timelineData[index],
+            }));
+
+            let cleanedData = combinedArray.filter((res) => res.start !== res.end);
+
+            if (localSubtitleString) {
+                try {
+                    const localSubtitle = JSON.parse(localSubtitleString);
+
+                    if (localSubtitle.length) {
+                        setSubtitleOriginal(localSubtitle.map((item) => new Sub(item)));
+                    } else {
+                        setSubtitleOriginal(cleanedData.map((item) => new Sub(item)));
+                    }
+                } catch (error) {
+                    setSubtitleOriginal(cleanedData.map((item) => new Sub(item)));
+                }
+            } else {
+                setSubtitleOriginal(cleanedData.map((item) => new Sub(item)));
+            }
         }
     }, [setSubtitleOriginal]);
 
@@ -355,6 +423,10 @@ export default function VideoPlayerApp({ defaultLang }) {
         setDirectUrl,
         viewEng,
         setViewEng,
+        bookmarked,
+        setBookmarked,
+        subtitleComment,
+        setSubtitleComment,
 
         notify,
         newSub,
@@ -375,9 +447,14 @@ export default function VideoPlayerApp({ defaultLang }) {
             <GlobalStyle />
             <Style>
                 <Tool {...props} />
-                <div className="main">
-                    <Player {...props} />
-                    <Subtitles {...props} />
+                <div className="container">
+                    <div style={{ marginLeft: 'auto', marginRight: 'auto', marginTop: 'auto', marginBottom: 'auto' }}>
+                        <Player {...props} />
+                    </div>
+
+                    <div style={{ marginLeft: 'auto', overflow: 'scroll' }}>
+                        <Subtitles {...props} />
+                    </div>
                 </div>
 
                 <Footer {...props} />

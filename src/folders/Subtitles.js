@@ -5,6 +5,9 @@ import unescape from 'lodash/unescape';
 import debounce from 'lodash/debounce';
 import DeleteIcon from '@mui/icons-material/Delete';
 import MergeIcon from '@mui/icons-material/Merge';
+import ChatIcon from '@mui/icons-material/Chat';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
+import { Button, Typography, Popover } from '@mui/material';
 
 const Style = styled.div`
     position: relative;
@@ -49,6 +52,14 @@ const Style = styled.div`
                         background-color: rgb(123 29 0);
                         border: 1px solid rgba(255, 255, 255, 0.3);
                     }
+                    &.cplYellow {
+                        color: rgb(255, 255, 0);
+                        border: 1px solid rgba(255, 255, 255, 0.3);
+                    }
+                    &.cplOrange {
+                        color: rgb(218, 155, 0);
+                        border: 1px solid rgba(255, 255, 255, 0.3);
+                    }
                 }
 
                 .container ul {
@@ -81,8 +92,22 @@ export default function Subtitles({
     removeSub,
     mergeSub,
     viewEng,
+    bookmarked,
+    setBookmarked,
+    subtitleComment,
+    setSubtitleComment,
 }) {
     const [height, setHeight] = useState(100);
+
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [anchorIndex, setAnchorIndex] = useState(null);
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
+    const open = Boolean(anchorEl);
+    const id = open ? 'simple-popover' : undefined;
 
     const resize = useCallback(() => {
         setHeight(document.body.clientHeight - 170);
@@ -96,20 +121,25 @@ export default function Subtitles({
             window.addEventListener('resize', debounceResize);
         }
     }, [resize]);
+    const videoProps = JSON.parse(localStorage.getItem('videoProps'));
 
     return (
         <>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-                    {window.localStorage.getItem('lang') === null ? (
+                    {window.localStorage.getItem('lang') === null &&
+                    (videoProps.translatedString === null ||
+                        videoProps.translatedString === 'null' ||
+                        videoProps.translatedString === ' ' ||
+                        videoProps.translatedString === '') ? (
                         <>
-                            <div style={{ marginLeft: '9%' }}>CPS/CPL</div>
+                            <div style={{ marginLeft: '13%' }}>CPS/CPL</div>
 
                             <div style={{ marginRight: '35%' }}>Original Text</div>
                         </>
                     ) : (
                         <>
-                            <div style={{ marginLeft: '6%' }}>CPS/CPL</div>
+                            <div style={{ marginLeft: '10%' }}>CPS/CPL</div>
                             <div style={{ marginRight: '18%' }}>Translated Text</div>
                             <div style={{ marginRight: '18%' }}>Original Text</div>
                         </>
@@ -148,13 +178,124 @@ export default function Subtitles({
                                                 justifyContent: 'space-evenly',
                                             }}
                                         >
-                                            <DeleteIcon
-                                                style={{ fontSize: '18px', marginRight: '10px', cursor: 'pointer' }}
-                                                onClick={() => removeSub(props.rowData)}
+                                            <ChatIcon
+                                                style={{
+                                                    fontSize: '19px',
+                                                    marginRight: '10px',
+                                                    cursor: 'pointer',
+                                                    color:
+                                                        subtitleComment.find((o) => o.index === props.index) ===
+                                                        undefined
+                                                            ? null
+                                                            : 'green',
+                                                }}
+                                                onClick={(event) => {
+                                                    setAnchorEl(event.currentTarget);
+                                                    setAnchorIndex(props.index);
+                                                }}
                                             />
+
+                                            <Popover
+                                                id={id}
+                                                open={open}
+                                                anchorEl={anchorEl}
+                                                anchorOrigin={{
+                                                    vertical: 'bottom',
+                                                    horizontal: 'left',
+                                                }}
+                                            >
+                                                <Typography sx={{ p: 2 }}>
+                                                    <textarea
+                                                        placeholder={'Enter a comment.'}
+                                                        style={{ minWidth: '200px', minHeight: '100px' }}
+                                                        defaultValue={
+                                                            subtitleComment.find((el) => el.index === anchorIndex) ===
+                                                            undefined
+                                                                ? ''
+                                                                : subtitleComment.find((el) => el.index === anchorIndex)
+                                                                      .comments
+                                                        }
+                                                        onChange={(e) => {
+                                                            const element = subtitleComment.find(
+                                                                (el) => el.index === anchorIndex,
+                                                            );
+
+                                                            if (element === undefined) {
+                                                                setSubtitleComment((comment) => [
+                                                                    ...comment,
+                                                                    { index: anchorIndex, comments: e.target.value },
+                                                                ]);
+                                                            } else {
+                                                                element.comments = e.target.value;
+                                                            }
+                                                        }}
+                                                    />
+                                                    <br></br>
+                                                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                                        <Button
+                                                            variant="contained"
+                                                            style={{ backgroundColor: '#048377', width: '80px' }}
+                                                            onClick={(e) => {
+                                                                let filteredComments = subtitleComment
+                                                                    .filter((o) => o.comments !== '')
+                                                                    .sort(function (a, b) {
+                                                                        return a.index - b.index;
+                                                                    });
+
+                                                                setSubtitleComment(filteredComments);
+                                                                handleClose();
+                                                            }}
+                                                        >
+                                                            Save
+                                                        </Button>
+                                                    </div>
+                                                </Typography>
+                                            </Popover>
+
                                             <MergeIcon
-                                                style={{ fontSize: '18px', marginRight: '10px', cursor: 'pointer' }}
+                                                style={{ fontSize: '19px', marginRight: '10px', cursor: 'pointer' }}
                                                 onClick={() => mergeSub(props.rowData)}
+                                            />
+                                        </div>
+
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                justifyContent: 'space-evenly',
+                                            }}
+                                        >
+                                            <BookmarkIcon
+                                                style={{
+                                                    fontSize: '19px',
+                                                    marginRight: '10px',
+                                                    cursor: 'pointer',
+                                                    color:
+                                                        bookmarked.find((o) => o.index === props.index) === undefined
+                                                            ? null
+                                                            : 'orange',
+                                                }}
+                                                onClick={() => {
+                                                    const element = bookmarked.find((el) => el.index === props.index);
+
+                                                    if (element === undefined) {
+                                                        setBookmarked((data) => [
+                                                            ...data,
+                                                            { index: props.index, flag: 'Y' },
+                                                        ]);
+                                                    } else {
+                                                        const filtered = bookmarked.filter(function (el) {
+                                                            return el.index !== props.index;
+                                                        });
+
+                                                        setBookmarked(filtered);
+                                                    }
+                                                }}
+                                            />
+
+                                            <DeleteIcon
+                                                style={{ fontSize: '19px', marginRight: '10px', cursor: 'pointer' }}
+                                                onClick={() => removeSub(props.rowData)}
                                             />
                                         </div>
 
@@ -163,29 +304,62 @@ export default function Subtitles({
                                             style={{
                                                 width: '150px',
                                                 textAlign: 'center',
-                                                paddingTop: '35px',
+                                                paddingTop: '5px',
+                                                fontSize: '12px',
                                             }}
                                             spellCheck={false}
                                             className={[
                                                 'textarea',
                                                 currentIndex === props.index ? 'highlight' : '',
                                                 checkSub(props.rowData) ? 'illegal' : '',
+
+                                                viewEng &&
+                                                ((props?.rowData?.text?.length / props?.rowData?.duration).toFixed(0) >
+                                                    28 ||
+                                                    props?.rowData?.text?.split('\n')?.map((e) => e.length) > 55)
+                                                    ? 'cplOrange'
+                                                    : '',
+
+                                                !viewEng &&
+                                                ((props?.rowData?.text2?.length / props?.rowData?.duration).toFixed(0) >
+                                                    28 ||
+                                                    props?.rowData?.text2?.split('\n')?.map((e) => e.length) > 55)
+                                                    ? 'cplOrange'
+                                                    : '',
+
+                                                viewEng &&
+                                                ((props?.rowData?.text?.length / props?.rowData?.duration).toFixed(0) >
+                                                    24 ||
+                                                    props?.rowData?.text?.split('\n')?.map((e) => e.length) > 45)
+                                                    ? 'cplYellow'
+                                                    : '',
+
+                                                !viewEng &&
+                                                ((props?.rowData?.text2?.length / props?.rowData?.duration).toFixed(0) >
+                                                    24 ||
+                                                    props?.rowData?.text2?.split('\n')?.map((e) => e.length) > 45)
+                                                    ? 'cplYellow'
+                                                    : '',
                                             ]
                                                 .join(' ')
                                                 .trim()}
                                             value={
                                                 props?.rowData?.text === undefined ||
                                                 props?.rowData?.text2 === undefined
-                                                    ? '0/0'
+                                                    ? `0/0`
                                                     : viewEng
-                                                    ? `${(
-                                                          props?.rowData?.text?.length / props?.rowData?.duration
-                                                      ).toFixed(0)} / ${props?.rowData?.text
-                                                          ?.split('\n')
-                                                          ?.map((e) => e.length)}`
-                                                    : `${(
-                                                          props?.rowData?.text2?.length / props?.rowData?.duration
-                                                      ).toFixed(0)} / ${props?.rowData?.text2
+                                                    ? `${props.rowData.startTime.toFixed(
+                                                          2,
+                                                      )} - ${props.rowData.endTime.toFixed(2)} seconds
+                                                    ${(props?.rowData?.text?.length / props?.rowData?.duration).toFixed(
+                                                        0,
+                                                    )} / ${props?.rowData?.text?.split('\n')?.map((e) => e.length)}`
+                                                    : `${props.rowData.startTime.toFixed(
+                                                          2,
+                                                      )} - ${props.rowData.endTime.toFixed(2)} seconds
+                                                    ${(
+                                                        props?.rowData?.text2?.length / props?.rowData?.duration
+                                                    ).toFixed(0)} / ${props?.rowData?.text2
                                                           ?.split('\n')
                                                           ?.map((e) => e.length)}`
                                             }
@@ -196,8 +370,15 @@ export default function Subtitles({
                                             }}
                                         />
 
-                                        {window.localStorage.getItem('lang') === null ? null : (
+                                        {window.localStorage.getItem('lang') === null &&
+                                        (videoProps.translatedString === null ||
+                                            videoProps.translatedString === 'null' ||
+                                            videoProps.translatedString === ' ' ||
+                                            videoProps.translatedString === '') ? null : (
                                             <textarea
+                                                style={{
+                                                    fontSize: '16px',
+                                                }}
                                                 spellcheck="true"
                                                 className={[
                                                     'textarea',
@@ -216,6 +397,9 @@ export default function Subtitles({
                                         )}
 
                                         <textarea
+                                            style={{
+                                                fontSize: '16px',
+                                            }}
                                             spellcheck="true"
                                             className={[
                                                 'textarea',
