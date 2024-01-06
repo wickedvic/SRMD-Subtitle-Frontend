@@ -15,6 +15,7 @@ import Popover from '@mui/material/Popover';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import { Checkbox } from '@mui/material';
+import { useEffect } from 'react';
 
 const Style = styled.div`
     display: flex;
@@ -72,6 +73,7 @@ export default function Header({
     setViewEng,
 
     bookmarked,
+    subtitleComment,
 }) {
     const [anchorEl, setAnchorEl] = React.useState(null);
 
@@ -141,6 +143,92 @@ export default function Header({
             });
     }, [subtitle, setLoading, formatSub, setSubtitle, tempTranslate, setTranslate, notify]);
 
+    useEffect(() => {
+        const interval = setInterval(() => {
+            const parsedSubtitle = {
+                cues: [],
+                valid: true,
+            };
+            subtitle.forEach((subtitle, index) => {
+                const cue = {
+                    identifier: '',
+                    start: subtitle.start.split(':').reduce((acc, time) => 60 * acc + +time),
+                    end: subtitle.end.split(':').reduce((acc, time) => 60 * acc + +time),
+                    text: subtitle.text2,
+                    styles: 'line:13 position:50% align:center size:80%',
+                };
+                parsedSubtitle.cues.push(cue);
+            });
+
+            const parsedSubtitleTrans = {
+                cues: [],
+                valid: true,
+            };
+            subtitle.forEach((subtitle, index) => {
+                const cue = {
+                    identifier: '',
+                    start: subtitle.start.split(':').reduce((acc, time) => 60 * acc + +time),
+                    end: subtitle.end.split(':').reduce((acc, time) => 60 * acc + +time),
+                    text: subtitle.text,
+                    styles: 'line:13 position:50% align:center size:80%',
+                };
+                parsedSubtitleTrans.cues.push(cue);
+            });
+
+            if (
+                parsedSubtitle.cues[0].text !== parsedSubtitleTrans.cues[0].text &&
+                parsedSubtitle.cues[1].text !== parsedSubtitleTrans.cues[1].text &&
+                parsedSubtitle.cues[2].text !== parsedSubtitleTrans.cues[2].text &&
+                parsedSubtitle.cues[3].text !== parsedSubtitleTrans.cues[3].text &&
+                parsedSubtitle.cues[4].text !== parsedSubtitleTrans.cues[4].text
+            ) {
+                try {
+                    const videoProps = JSON.parse(localStorage.getItem('videoProps'));
+                    const modifiedSubtitleContent = WebVTT.compile(parsedSubtitle);
+                    const modifiedSubtitleContentTrans = WebVTT.compile(parsedSubtitleTrans);
+
+                    axios
+                        .put(`https://speechtotexteditor.azurewebsites.net/api/v1/videos/${videoProps.id}`, {
+                            subtitleString: btoa(modifiedSubtitleContent),
+                            metadataCheckFlag: bookmarked,
+                            metadataComments: subtitleComment,
+                            translatedString: btoa(encodeURIComponent(modifiedSubtitleContentTrans)),
+                        })
+                        .then(function (response) {
+                            console.log(response.data);
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+                } catch (error) {
+                    console.log(error);
+                }
+            } else {
+                try {
+                    const videoProps = JSON.parse(localStorage.getItem('videoProps'));
+                    const modifiedSubtitleContent = WebVTT.compile(parsedSubtitle);
+
+                    axios
+                        .put(`https://speechtotexteditor.azurewebsites.net/api/v1/videos/${videoProps.id}`, {
+                            subtitleString: btoa(modifiedSubtitleContent),
+                            metadataCheckFlag: bookmarked,
+                            metadataComments: subtitleComment,
+                        })
+                        .then(function (response) {
+                            console.log(response.data);
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+                } catch (error) {
+                    console.log(error);
+                }
+            }
+        }, 60000);
+
+        return () => clearInterval(interval);
+    }, [bookmarked, subtitleComment, subtitle]);
+
     return (
         <Style className="tool">
             <div className="top">
@@ -167,6 +255,9 @@ export default function Header({
                             >
                                 <Typography sx={{ p: 2 }}>
                                     <b>Play/Pause Video:</b> Tab (Outside Textbox)
+                                </Typography>
+                                <Typography sx={{ p: 2 }}>
+                                    <b>Left/Right Arrow Key:</b> Forward/Back 3 Seconds
                                 </Typography>
                                 <Typography sx={{ p: 2 }}>
                                     <b>Show Video Controls:</b> Right Click On Video And Click Show Controls (Playback
@@ -207,6 +298,11 @@ export default function Header({
                                     <b>Change Subtitle View (Once User Clicks Translation):</b> Click checkbox to see
                                     translated text/original text. Will render on video and timeline. As well as what is
                                     exported
+                                </Typography>
+
+                                <Typography sx={{ p: 2 }}>
+                                    <b>CPS/CPL Color:</b> CPS above 24 and CPL above 45 turns yellow. CPS above 28 and
+                                    CPL above 55 turns orange.
                                 </Typography>
                             </Popover>
                         </div>
@@ -262,6 +358,8 @@ export default function Header({
                     >
                         <option value="SRT">Export SRT</option>
                         <option value="VTT">Export VTT</option>
+                        <option value="ASS">Export ASS</option>
+                        <option value="TXT">Export TXT</option>
                     </select>
 
                     <div
@@ -272,6 +370,10 @@ export default function Header({
                                 downloadSub('srt');
                             } else if (exportValue === 'VTT') {
                                 downloadSub('vtt');
+                            } else if (exportValue === 'ASS') {
+                                downloadSub('ass');
+                            } else if (exportValue === 'TXT') {
+                                downloadSub('txt');
                             }
                         }}
                     >
@@ -356,7 +458,8 @@ export default function Header({
                                                     `https://speechtotexteditor.azurewebsites.net/api/v1/videos/${videoProps.id}`,
                                                     {
                                                         subtitleString: btoa(modifiedSubtitleContent),
-                                                        metadataCheckFlag: JSON.stringify(bookmarked.sort()),
+                                                        metadataCheckFlag: bookmarked,
+                                                        metadataComments: subtitleComment,
                                                         translatedString: btoa(
                                                             encodeURIComponent(modifiedSubtitleContentTrans),
                                                         ),
@@ -404,7 +507,8 @@ export default function Header({
                                                     `https://speechtotexteditor.azurewebsites.net/api/v1/videos/${videoProps.id}`,
                                                     {
                                                         subtitleString: btoa(modifiedSubtitleContent),
-                                                        metadataCheckFlag: JSON.stringify(bookmarked.sort()),
+                                                        metadataCheckFlag: bookmarked,
+                                                        metadataComments: subtitleComment,
                                                     },
                                                 )
                                                 .then(function (response) {

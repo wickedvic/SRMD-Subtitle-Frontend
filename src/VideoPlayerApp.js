@@ -51,6 +51,8 @@ export default function VideoPlayerApp({ defaultLang }) {
 
     const [bookmarked, setBookmarked] = useState([]);
 
+    const [subtitleComment, setSubtitleComment] = useState([]);
+
     const newSub = useCallback((item) => new Sub(item), []);
     const hasSub = useCallback((sub) => subtitle.indexOf(sub), [subtitle]);
 
@@ -249,6 +251,7 @@ export default function VideoPlayerApp({ defaultLang }) {
     const onKeyDown = useCallback(
         (event) => {
             const keyCode = getKeyCode(event);
+
             switch (keyCode) {
                 case 9:
                     event.preventDefault();
@@ -260,6 +263,21 @@ export default function VideoPlayerApp({ defaultLang }) {
                         }
                     }
                     break;
+
+                case 39:
+                    event.preventDefault();
+                    if (player) {
+                        player.currentTime = player.currentTime + 3.0;
+                    }
+                    break;
+
+                case 37:
+                    event.preventDefault();
+                    if (player && player.currentTime > 3.0) {
+                        player.currentTime = player.currentTime - 3.0;
+                    }
+                    break;
+
                 case 90:
                     event.preventDefault();
                     if (event.metaKey) {
@@ -294,12 +312,19 @@ export default function VideoPlayerApp({ defaultLang }) {
 
         const videoProps = JSON.parse(localStorage.getItem('videoProps'));
 
-        setBookmarked(JSON.parse(videoProps.metadataCheckFlag));
+        if (videoProps.metadataCheckFlag.length > 0) {
+            setBookmarked(videoProps.metadataCheckFlag);
+        }
+
+        if (videoProps.metadataComments.length > 0) {
+            setSubtitleComment(videoProps.metadataComments);
+        }
 
         if (
             videoProps.translatedString === null ||
             videoProps.translatedString === 'null' ||
-            videoProps.translatedString === ' '
+            videoProps.translatedString === ' ' ||
+            videoProps.translatedString === ''
         ) {
             const subtitleData = atob(videoProps.subtitleString);
 
@@ -400,6 +425,8 @@ export default function VideoPlayerApp({ defaultLang }) {
         setViewEng,
         bookmarked,
         setBookmarked,
+        subtitleComment,
+        setSubtitleComment,
 
         notify,
         newSub,
