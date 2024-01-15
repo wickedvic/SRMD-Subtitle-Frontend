@@ -188,7 +188,7 @@ export default function Header({
                     const modifiedSubtitleContentTrans = WebVTT.compile(parsedSubtitleTrans);
 
                     axios
-                        .put(`https://speechtotexteditor.azurewebsites.net/api/v1/videos/${videoProps.id}`, {
+                        .put(`https://vaani.srmd.org/api/v1/videos/${videoProps.id}`, {
                             subtitleString: btoa(modifiedSubtitleContent),
                             metadataCheckFlag: bookmarked,
                             metadataComments: subtitleComment,
@@ -209,7 +209,7 @@ export default function Header({
                     const modifiedSubtitleContent = WebVTT.compile(parsedSubtitle);
 
                     axios
-                        .put(`https://speechtotexteditor.azurewebsites.net/api/v1/videos/${videoProps.id}`, {
+                        .put(`https://vaani.srmd.org/api/v1/videos/${videoProps.id}`, {
                             subtitleString: btoa(modifiedSubtitleContent),
                             metadataCheckFlag: bookmarked,
                             metadataComments: subtitleComment,
@@ -454,17 +454,14 @@ export default function Header({
                                             const modifiedSubtitleContentTrans = WebVTT.compile(parsedSubtitleTrans);
 
                                             axios
-                                                .put(
-                                                    `https://speechtotexteditor.azurewebsites.net/api/v1/videos/${videoProps.id}`,
-                                                    {
-                                                        subtitleString: btoa(modifiedSubtitleContent),
-                                                        metadataCheckFlag: bookmarked,
-                                                        metadataComments: subtitleComment,
-                                                        translatedString: btoa(
-                                                            encodeURIComponent(modifiedSubtitleContentTrans),
-                                                        ),
-                                                    },
-                                                )
+                                                .put(`https://vaani.srmd.org/api/v1/videos/${videoProps.id}`, {
+                                                    subtitleString: btoa(modifiedSubtitleContent),
+                                                    metadataCheckFlag: bookmarked,
+                                                    metadataComments: subtitleComment,
+                                                    translatedString: btoa(
+                                                        encodeURIComponent(modifiedSubtitleContentTrans),
+                                                    ),
+                                                })
                                                 .then(function (response) {
                                                     setLoading('');
 
@@ -503,14 +500,11 @@ export default function Header({
                                             const modifiedSubtitleContent = WebVTT.compile(parsedSubtitle);
 
                                             axios
-                                                .put(
-                                                    `https://speechtotexteditor.azurewebsites.net/api/v1/videos/${videoProps.id}`,
-                                                    {
-                                                        subtitleString: btoa(modifiedSubtitleContent),
-                                                        metadataCheckFlag: bookmarked,
-                                                        metadataComments: subtitleComment,
-                                                    },
-                                                )
+                                                .put(`https://vaani.srmd.org/api/v1/videos/${videoProps.id}`, {
+                                                    subtitleString: btoa(modifiedSubtitleContent),
+                                                    metadataCheckFlag: bookmarked,
+                                                    metadataComments: subtitleComment,
+                                                })
                                                 .then(function (response) {
                                                     setLoading('');
 

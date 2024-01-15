@@ -48,7 +48,7 @@ const Videos = () => {
         await blobClient.uploadBrowserData(new_file, options);
 
         axios
-            .post('https://speechtotexteditor.azurewebsites.net/api/v1/videos', {
+            .post('https://vaani.srmd.org/api/v1/videos', {
                 videoUrl: `https://srmdmediastorage.blob.core.windows.net/video/${new_file.name}`,
             })
             .then(function (response) {
@@ -79,7 +79,7 @@ const Videos = () => {
 
     useEffect(() => {
         axios
-            .get('https://speechtotexteditor.azurewebsites.net/api/v1/videos')
+            .get('https://vaani.srmd.org/api/v1/videos')
             .then((response) => {
                 console.log(response.data);
                 setRows(response.data.reverse());
@@ -177,9 +177,7 @@ const Videos = () => {
                                                 setFileUploading(true);
 
                                                 axios
-                                                    .delete(
-                                                        `https://speechtotexteditor.azurewebsites.net/api/v1/videos/${props.id}`,
-                                                    )
+                                                    .delete(`https://vaani.srmd.org/api/v1/videos/${props.id}`)
                                                     .then(function (response) {
                                                         setFileUploading(false);
                                                         // console.log(response);
