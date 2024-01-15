@@ -38,7 +38,7 @@ export default function Login(props) {
         event.preventDefault();
 
         axios
-            .post('https://speechtotexteditor.azurewebsites.net/api/v1/login', {
+            .post('https://vaani.srmd.org/api/v1/login', {
                 email: email,
                 password: password,
             })
