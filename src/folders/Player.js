@@ -139,12 +139,12 @@ const VideoWrap = memo(
             <>
                 <video
                     id="videoPlayer"
-                    className="#videoPlayer"
+                    className="videoPlayer"
                     onClick={onClick}
                     src={`${videoProps.videoUrl}`}
                     ref={$video}
                     controls
-                />
+                ></video>
             </>
         );
     },
