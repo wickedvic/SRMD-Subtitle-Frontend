@@ -206,6 +206,8 @@ const App = () => {
                                         ))}
                                     </Box>
 
+                                    <span style={{ marginRight: '2%' }}>Version: {process.env.REACT_APP_VERSION}</span>
+
                                     <Box sx={{ flexGrow: 0 }}>
                                         <Tooltip title="Open settings">
                                             <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
