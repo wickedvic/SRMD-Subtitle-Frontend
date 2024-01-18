@@ -108,14 +108,7 @@ dist
 .build/
 .build/*.*
 
-
-build/static/js/main.8b225a67.js.map
-build/static/js/main.8b225a67.js.LICENSE.txt
-build/static/js/main.8b225a67.js
-build/static/js/651.0259a92f.chunk.js.map
-build/static/js/651.0259a92f.chunk.js
-build/static/css/main.8e7395a4.css.map
-build/static/css/main.8e7395a4.css
+build/static
 build/SRMD-Logo.png
 build/silence.mp3
 build/robots.txt
@@ -124,11 +117,3 @@ build/loading.svg
 build/index.html
 build/favicon.ico
 build/asset-manifest.json
-build/static/css/main.29add955.css
-build/static/css/main.29add955.css.map
-build/static/js/main.0324449b.js
-build/static/js/main.0324449b.js.LICENSE.txt
-build/static/js/main.0324449b.js.map
-build/static/js/main.3e34aa1a.js
-build/static/js/main.3e34aa1a.js.LICENSE.txt
-build/static/js/main.3e34aa1a.js.map
