@@ -1,20 +1,20 @@
-import styled from 'styled-components';
-import languages from '../libs/languages';
-import { t, Translate } from 'react-i18nify';
-import React, { useState, useCallback } from 'react';
-import { download } from '../utils';
-import { sub2vtt, sub2srt, sub2txt } from '../libs/readSub';
-import sub2ass from '../libs/readSub/sub2ass';
-import googleTranslate from '../libs/googleTranslate';
 import FFmpeg from '@ffmpeg/ffmpeg';
-import WebVTT from 'node-webvtt';
 import axios from 'axios';
+import WebVTT from 'node-webvtt';
+import React, { useCallback, useState } from 'react';
+import { t, Translate } from 'react-i18nify';
+import styled from 'styled-components';
 import Swal from 'sweetalert2';
+import googleTranslate from '../libs/googleTranslate';
+import languages from '../libs/languages';
+import { sub2srt, sub2txt, sub2vtt } from '../libs/readSub';
+import sub2ass from '../libs/readSub/sub2ass';
+import { download } from '../utils';
 
+import { Checkbox } from '@mui/material';
+import Button from '@mui/material/Button';
 import Popover from '@mui/material/Popover';
 import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import { Checkbox } from '@mui/material';
 import { useEffect } from 'react';
 
 const Style = styled.div`
@@ -188,7 +188,7 @@ export default function Header({
                     const modifiedSubtitleContentTrans = WebVTT.compile(parsedSubtitleTrans);
 
                     axios
-                        .put(`https://vaani.srmd.org/api/v1/videos/${videoProps.id}`, {
+                        .put(process.env.REACT_APP_API_URL+`/api/v1/videos/${videoProps.id}`, {
                             subtitleString: btoa(modifiedSubtitleContent),
                             metadataCheckFlag: bookmarked,
                             metadataComments: subtitleComment,
@@ -209,7 +209,7 @@ export default function Header({
                     const modifiedSubtitleContent = WebVTT.compile(parsedSubtitle);
 
                     axios
-                        .put(`https://vaani.srmd.org/api/v1/videos/${videoProps.id}`, {
+                        .put(process.env.REACT_APP_API_URL+`/api/v1/videos/${videoProps.id}`, {
                             subtitleString: btoa(modifiedSubtitleContent),
                             metadataCheckFlag: bookmarked,
                             metadataComments: subtitleComment,
@@ -454,7 +454,7 @@ export default function Header({
                                             const modifiedSubtitleContentTrans = WebVTT.compile(parsedSubtitleTrans);
 
                                             axios
-                                                .put(`https://vaani.srmd.org/api/v1/videos/${videoProps.id}`, {
+                                                .put(process.env.REACT_APP_API_URL+`/api/v1/videos/${videoProps.id}`, {
                                                     subtitleString: btoa(modifiedSubtitleContent),
                                                     metadataCheckFlag: bookmarked,
                                                     metadataComments: subtitleComment,
@@ -500,7 +500,7 @@ export default function Header({
                                             const modifiedSubtitleContent = WebVTT.compile(parsedSubtitle);
 
                                             axios
-                                                .put(`https://vaani.srmd.org/api/v1/videos/${videoProps.id}`, {
+                                                .put(process.env.REACT_APP_API_URL+`/api/v1/videos/${videoProps.id}`, {
                                                     subtitleString: btoa(modifiedSubtitleContent),
                                                     metadataCheckFlag: bookmarked,
                                                     metadataComments: subtitleComment,

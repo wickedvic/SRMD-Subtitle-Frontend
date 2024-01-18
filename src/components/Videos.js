@@ -1,20 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import { BlobServiceClient } from '@azure/storage-blob';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { Backdrop, Box, Button, CircularProgress } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { Link } from 'react-router-dom';
-import { BlobServiceClient } from '@azure/storage-blob';
-import { FileUploader } from 'react-drag-drop-files';
-import Swal from 'sweetalert2';
 import axios from 'axios';
-import moment from 'moment';
 import { MaterialReactTable } from 'material-react-table';
-import AddIcon from '@mui/icons-material/Add';
+import moment from 'moment';
+import React, { useEffect, useState } from 'react';
+import { FileUploader } from 'react-drag-drop-files';
+import { Link } from 'react-router-dom';
+import Swal from 'sweetalert2';
 import '../App.css';
 
 const Videos = () => {
@@ -23,8 +23,10 @@ const Videos = () => {
     const [open, setOpen] = useState(false);
     const [rows, setRows] = useState([]);
     const [fileUploading, setFileUploading] = useState(false);
+    console.log(process.env.REACT_APP_API_URL);
 
     async function UploadFile() {
+
         setFileUploading(true);
         const new_file = new File([file], `${file.name.split('.mp4')[0]}-${Date.now()}.mp4`.replace(/\s/g, ''), {
             type: file.type,
@@ -48,7 +50,7 @@ const Videos = () => {
         await blobClient.uploadBrowserData(new_file, options);
 
         axios
-            .post('https://vaani.srmd.org/api/v1/videos', {
+            .post(process.env.REACT_APP_API_URL+'/api/v1/videos', {
                 videoUrl: `https://srmdmediastorage.blob.core.windows.net/video/${new_file.name}`,
             })
             .then(function (response) {
@@ -79,7 +81,7 @@ const Videos = () => {
 
     useEffect(() => {
         axios
-            .get('https://vaani.srmd.org/api/v1/videos')
+            .get(process.env.REACT_APP_API_URL+'/api/v1/videos')
             .then((response) => {
                 console.log(response.data);
                 setRows(response.data.reverse());
@@ -177,7 +179,7 @@ const Videos = () => {
                                                 setFileUploading(true);
 
                                                 axios
-                                                    .delete(`https://vaani.srmd.org/api/v1/videos/${props.id}`)
+                                                    .delete(process.env.REACT_APP_API_URL+`/api/v1/videos/${props.id}`)
                                                     .then(function (response) {
                                                         setFileUploading(false);
                                                         // console.log(response);
