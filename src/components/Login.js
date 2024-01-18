@@ -14,7 +14,7 @@ import React, { useState } from 'react';
 import Swal from 'sweetalert2';
 
 function Copyright(props) {
-        return (
+    return (
         <Typography variant="body2" color="text.secondary" align="center" {...props}>
             {'Copyright © '}
             <Link color="inherit" href="https://www.srmd.org/">
@@ -36,9 +36,9 @@ export default function Login(props) {
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        
+
         axios
-            .post(process.env.REACT_APP_API_URL+'/api/v1/login', {
+            .post(process.env.REACT_APP_API_URL + '/api/v1/login', {
                 email: email,
                 password: password,
             })
@@ -52,6 +52,7 @@ export default function Login(props) {
                     });
                 } else {
                     localStorage.setItem('authToken', JSON.stringify(response.data.authorization));
+                    localStorage.setItem('authUser', JSON.stringify({ email: email, access: password }));
                     window.location.href = '/';
                 }
             })

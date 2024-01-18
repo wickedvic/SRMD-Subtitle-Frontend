@@ -44,7 +44,7 @@
         "wfplayer": "^2.1.0"
     },
     "scripts": {
-        "start": "react-scripts --openssl-legacy-provider start",
+        "start": "env-cmd -f .env.staging react-scripts --openssl-legacy-provider start",
         "build": "react-scripts build",
         "test": "react-scripts test",
         "eject": "react-scripts eject",
