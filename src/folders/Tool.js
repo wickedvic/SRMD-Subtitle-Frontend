@@ -93,8 +93,10 @@ export default function Header({
 
     const downloadSub = useCallback(
         (type) => {
+            const videoProps = JSON.parse(localStorage.getItem('videoProps'));
             let text = '';
-            const name = `${Date.now()}.${type}`;
+            const name = `${videoProps?.videoUrl?.split('video/')[1].split('.mp4')[0]}.${type}`;
+
             switch (type) {
                 case 'vtt':
                     text = sub2vtt(subtitle, viewEng);
@@ -188,7 +190,7 @@ export default function Header({
                     const modifiedSubtitleContentTrans = WebVTT.compile(parsedSubtitleTrans);
 
                     axios
-                        .put(process.env.REACT_APP_API_URL+`/api/v1/videos/${videoProps.id}`, {
+                        .put(process.env.REACT_APP_API_URL + `/api/v1/videos/${videoProps.id}`, {
                             subtitleString: btoa(modifiedSubtitleContent),
                             metadataCheckFlag: bookmarked,
                             metadataComments: subtitleComment,
@@ -209,7 +211,7 @@ export default function Header({
                     const modifiedSubtitleContent = WebVTT.compile(parsedSubtitle);
 
                     axios
-                        .put(process.env.REACT_APP_API_URL+`/api/v1/videos/${videoProps.id}`, {
+                        .put(process.env.REACT_APP_API_URL + `/api/v1/videos/${videoProps.id}`, {
                             subtitleString: btoa(modifiedSubtitleContent),
                             metadataCheckFlag: bookmarked,
                             metadataComments: subtitleComment,
@@ -454,14 +456,17 @@ export default function Header({
                                             const modifiedSubtitleContentTrans = WebVTT.compile(parsedSubtitleTrans);
 
                                             axios
-                                                .put(process.env.REACT_APP_API_URL+`/api/v1/videos/${videoProps.id}`, {
-                                                    subtitleString: btoa(modifiedSubtitleContent),
-                                                    metadataCheckFlag: bookmarked,
-                                                    metadataComments: subtitleComment,
-                                                    translatedString: btoa(
-                                                        encodeURIComponent(modifiedSubtitleContentTrans),
-                                                    ),
-                                                })
+                                                .put(
+                                                    process.env.REACT_APP_API_URL + `/api/v1/videos/${videoProps.id}`,
+                                                    {
+                                                        subtitleString: btoa(modifiedSubtitleContent),
+                                                        metadataCheckFlag: bookmarked,
+                                                        metadataComments: subtitleComment,
+                                                        translatedString: btoa(
+                                                            encodeURIComponent(modifiedSubtitleContentTrans),
+                                                        ),
+                                                    },
+                                                )
                                                 .then(function (response) {
                                                     setLoading('');
 
@@ -500,11 +505,14 @@ export default function Header({
                                             const modifiedSubtitleContent = WebVTT.compile(parsedSubtitle);
 
                                             axios
-                                                .put(process.env.REACT_APP_API_URL+`/api/v1/videos/${videoProps.id}`, {
-                                                    subtitleString: btoa(modifiedSubtitleContent),
-                                                    metadataCheckFlag: bookmarked,
-                                                    metadataComments: subtitleComment,
-                                                })
+                                                .put(
+                                                    process.env.REACT_APP_API_URL + `/api/v1/videos/${videoProps.id}`,
+                                                    {
+                                                        subtitleString: btoa(modifiedSubtitleContent),
+                                                        metadataCheckFlag: bookmarked,
+                                                        metadataComments: subtitleComment,
+                                                    },
+                                                )
                                                 .then(function (response) {
                                                     setLoading('');
 
