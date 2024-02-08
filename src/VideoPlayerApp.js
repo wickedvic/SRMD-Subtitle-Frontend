@@ -13,6 +13,7 @@ import { getKeyCode } from './utils';
 import Sub from './libs/Sub';
 import GlobalStyle from './GlobalStyle';
 import WebVTT from 'node-webvtt';
+import $ from 'jquery';
 
 const Style = styled.div`
     height: 100%;
@@ -284,6 +285,7 @@ export default function VideoPlayerApp({ defaultLang }) {
                         undoSubs();
                     }
                     break;
+
                 default:
                     break;
             }

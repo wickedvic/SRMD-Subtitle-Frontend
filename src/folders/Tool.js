@@ -75,6 +75,7 @@ export default function Header({
     bookmarked,
     subtitleComment,
 }) {
+    let userData = JSON.parse(localStorage.getItem('authUser'));
     const [anchorEl, setAnchorEl] = React.useState(null);
 
     const handleClick = (event) => {
@@ -290,6 +291,10 @@ export default function Header({
                                     <b>New Subtitle:</b> Drag on timeline
                                 </Typography>
                                 <Typography sx={{ p: 2 }}>
+                                    <b>Split Subtitle:</b> On actual video subtitle, click on subtitle, move where you
+                                    want to split with arrow keys and click split subtitle.
+                                </Typography>
+                                <Typography sx={{ p: 2 }}>
                                     <b>Delete Subtitle:</b> Trash icon or right click timeline subtitle
                                 </Typography>
                                 <Typography sx={{ p: 2 }}>
@@ -323,27 +328,34 @@ export default function Header({
                         )}
                     </div>
 
-                    <select
-                        style={{
-                            width: '15%',
-                            marginRight: '10px',
-                            height: '35px',
-                            minHeight: '35px',
-                            marginLeft: 'auto',
-                        }}
-                        value={tempTranslate}
-                        onChange={(event) => setTempTranslate(event.target.value)}
-                    >
-                        {(languages[language] || languages.en).map((item) => (
-                            <option key={item.key} value={item.key}>
-                                {item.name}
-                            </option>
-                        ))}
-                    </select>
-                    <div style={{ backgroundColor: '#673ab7', width: '10%' }} className="btn" onClick={onTranslate}>
-                        <Translate value="TRANSLATE" />
-                    </div>
-
+                    {userData.email === 'Srmd.english@gmail.com' ? null : (
+                        <>
+                            <select
+                                style={{
+                                    width: '15%',
+                                    marginRight: '10px',
+                                    height: '35px',
+                                    minHeight: '35px',
+                                    marginLeft: 'auto',
+                                }}
+                                value={tempTranslate}
+                                onChange={(event) => setTempTranslate(event.target.value)}
+                            >
+                                {(languages[language] || languages.en).map((item) => (
+                                    <option key={item.key} value={item.key}>
+                                        {item.name}
+                                    </option>
+                                ))}
+                            </select>
+                            <div
+                                style={{ backgroundColor: '#673ab7', width: '10%' }}
+                                className="btn"
+                                onClick={onTranslate}
+                            >
+                                <Translate value="TRANSLATE" />
+                            </div>
+                        </>
+                    )}
                     <select
                         style={{
                             width: '15%',
@@ -482,8 +494,6 @@ export default function Header({
                                                                 'videoProps',
                                                                 JSON.stringify(response.data),
                                                             );
-
-                                                            window.location.reload();
                                                         }
                                                     });
                                                 })
@@ -528,8 +538,6 @@ export default function Header({
                                                                 'videoProps',
                                                                 JSON.stringify(response.data),
                                                             );
-
-                                                            window.location.reload();
                                                         }
                                                     });
                                                 })
