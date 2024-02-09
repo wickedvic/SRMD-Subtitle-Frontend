@@ -9,7 +9,7 @@ const Users = () => {
 
     useEffect(() => {
         axios
-            .get('https://vaani.srmd.org/api/v1/users')
+            .get(process.env.REACT_APP_API_URL+'/api/v1/users')
             .then((response) => {
                 setUsers(response.data.reverse());
             })

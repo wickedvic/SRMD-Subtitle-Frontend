@@ -135,9 +135,11 @@ const VideoWrap = memo(
             }
         }, [$video]);
         const videoProps = JSON.parse(localStorage.getItem('videoProps'));
+        console.log(`${videoProps.videoUrl}`);
         return (
             <>
                 <video
+                    crossOrigin="anonymous"
                     id="videoPlayer"
                     className="videoPlayer"
                     onClick={onClick}

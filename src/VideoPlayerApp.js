@@ -284,6 +284,7 @@ export default function VideoPlayerApp({ defaultLang }) {
                         undoSubs();
                     }
                     break;
+
                 default:
                     break;
             }

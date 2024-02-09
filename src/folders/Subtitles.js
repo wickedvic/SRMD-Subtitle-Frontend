@@ -7,7 +7,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import MergeIcon from '@mui/icons-material/Merge';
 import ChatIcon from '@mui/icons-material/Chat';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
-import { Button, Typography, Popover } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent } from '@mui/material';
+// import $ from 'jquery';
 
 const Style = styled.div`
     position: relative;
@@ -99,15 +100,13 @@ export default function Subtitles({
 }) {
     const [height, setHeight] = useState(100);
 
-    const [anchorEl, setAnchorEl] = useState(null);
     const [anchorIndex, setAnchorIndex] = useState(null);
 
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
+    const [open, setOpen] = React.useState(false);
 
-    const open = Boolean(anchorEl);
-    const id = open ? 'simple-popover' : undefined;
+    const handleClose = () => {
+        setOpen(false);
+    };
 
     const resize = useCallback(() => {
         setHeight(document.body.clientHeight - 170);
@@ -162,10 +161,12 @@ export default function Subtitles({
                                     className={props.className}
                                     style={props.style}
                                     onClick={() => {
-                                        if (player) {
-                                            player.pause();
-                                            if (player.duration >= props.rowData.startTime) {
-                                                player.currentTime = props.rowData.startTime + 0.001;
+                                        if (!open) {
+                                            if (player) {
+                                                player.pause();
+                                                if (player.duration >= props.rowData.startTime) {
+                                                    player.currentTime = props.rowData.startTime + 0.001;
+                                                }
                                             }
                                         }
                                     }}
@@ -190,24 +191,24 @@ export default function Subtitles({
                                                             : 'green',
                                                 }}
                                                 onClick={(event) => {
-                                                    setAnchorEl(event.currentTarget);
+                                                    setOpen(true);
+
                                                     setAnchorIndex(props.index);
                                                 }}
                                             />
 
-                                            <Popover
-                                                id={id}
-                                                open={open}
-                                                anchorEl={anchorEl}
-                                                anchorOrigin={{
-                                                    vertical: 'bottom',
-                                                    horizontal: 'left',
+                                            <Dialog
+                                                BackdropProps={{
+                                                    style: { opacity: 0.1 },
                                                 }}
+                                                open={open}
+                                                aria-labelledby="alert-dialog-title"
+                                                aria-describedby="alert-dialog-description"
                                             >
-                                                <Typography sx={{ p: 2 }}>
+                                                <DialogContent>
                                                     <textarea
                                                         placeholder={'Enter a comment.'}
-                                                        style={{ minWidth: '200px', minHeight: '100px' }}
+                                                        style={{ minWidth: '300px', minHeight: '100px' }}
                                                         defaultValue={
                                                             subtitleComment.find((el) => el.index === anchorIndex) ===
                                                             undefined
@@ -230,27 +231,31 @@ export default function Subtitles({
                                                             }
                                                         }}
                                                     />
-                                                    <br></br>
-                                                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                                        <Button
-                                                            variant="contained"
-                                                            style={{ backgroundColor: '#048377', width: '80px' }}
-                                                            onClick={(e) => {
-                                                                let filteredComments = subtitleComment
-                                                                    .filter((o) => o.comments !== '')
-                                                                    .sort(function (a, b) {
-                                                                        return a.index - b.index;
-                                                                    });
+                                                </DialogContent>
+                                                <DialogActions>
+                                                    <Button
+                                                        onClick={(e) => {
+                                                            handleClose();
+                                                        }}
+                                                    >
+                                                        Cancel
+                                                    </Button>
+                                                    <Button
+                                                        onClick={(e) => {
+                                                            let filteredComments = subtitleComment
+                                                                .filter((o) => o.comments !== '')
+                                                                .sort(function (a, b) {
+                                                                    return a.index - b.index;
+                                                                });
 
-                                                                setSubtitleComment(filteredComments);
-                                                                handleClose();
-                                                            }}
-                                                        >
-                                                            Save
-                                                        </Button>
-                                                    </div>
-                                                </Typography>
-                                            </Popover>
+                                                            setSubtitleComment(filteredComments);
+                                                            handleClose();
+                                                        }}
+                                                    >
+                                                        Save
+                                                    </Button>
+                                                </DialogActions>
+                                            </Dialog>
 
                                             <MergeIcon
                                                 style={{ fontSize: '19px', marginRight: '10px', cursor: 'pointer' }}
@@ -363,11 +368,11 @@ export default function Subtitles({
                                                           ?.split('\n')
                                                           ?.map((e) => e.length)}`
                                             }
-                                            onChange={(event) => {
-                                                updateSub(props.rowData, {
-                                                    text: event.target.value,
-                                                });
-                                            }}
+                                            // onChange={(event) => {
+                                            //     updateSub(props.rowData, {
+                                            //         text: event.target.value,
+                                            //     });
+                                            // }}
                                         />
 
                                         {window.localStorage.getItem('lang') === null &&
