@@ -313,12 +313,12 @@ export default React.memo(
                                     left: render.padding * gridGap + (sub.startTime - render.beginTime) * gridGap * 10,
                                     width: (sub.endTime - sub.startTime) * gridGap * 10,
                                 }}
-                                onClick={() => {
+                                onDoubleClick={() => {
                                     if (player.duration >= sub.startTime) {
                                         player.currentTime = sub.startTime + 0.001;
                                     }
                                 }}
-                                onDoubleClick={(event) => onDoubleClick(sub, event)}
+                                // onDoubleClick={(event) => onDoubleClick(sub, event)}
                             >
                                 <ContextMenuTrigger id="contextmenu" holdToDisplay={-1}>
                                     <div
