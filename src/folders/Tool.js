@@ -7,9 +7,9 @@ import styled from 'styled-components';
 import Swal from 'sweetalert2';
 import googleTranslate from '../libs/googleTranslate';
 import languages from '../libs/languages';
-import { sub2srt, sub2txt, sub2vtt } from '../libs/readSub';
+import { file2sub, sub2srt, sub2txt, sub2vtt } from '../libs/readSub';
 import sub2ass from '../libs/readSub/sub2ass';
-import { download } from '../utils';
+import { getExt, download } from '../utils';
 
 import { Checkbox } from '@mui/material';
 import Button from '@mui/material/Button';
@@ -40,7 +40,7 @@ const Style = styled.div`
             justify-content: center;
             align-items: center;
             height: 35px;
-            width: 5%;
+            width: 4%;
             border-radius: 3px;
             color: #fff;
             cursor: pointer;
@@ -50,6 +50,41 @@ const Style = styled.div`
             margin-right: 10px;
             &:hover {
                 opacity: 1;
+            }
+        }
+
+        .import {
+            .btn {
+                position: relative;
+                opacity: 0.85;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 35px;
+                width: 100%;
+                border-radius: 3px;
+                color: #fff;
+                cursor: pointer;
+                font-size: 13px;
+                background-color: #3f51b5;
+                transition: all 0.2s ease 0s;
+                margin-right: 10px;
+                margin-left: 10px;
+
+                &:hover {
+                    opacity: 1;
+                }
+            }
+
+            .file {
+                position: absolute;
+                left: 0;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                width: 100%;
+                height: 100%;
+                opacity: 0;
             }
         }
     }
@@ -122,6 +157,60 @@ export default function Header({
         },
         [subtitle, viewEng],
     );
+
+    function toTime(seconds) {
+        var date = new Date(null);
+        date.setSeconds(seconds);
+        return new Date(seconds * 1000).toISOString().substr(11, 12);
+    }
+
+    const onSubtitleChange = useCallback(
+        (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const ext = getExt(file.name);
+                if (['ass', 'vtt', 'srt', 'json'].includes(ext)) {
+                    file2sub(file)
+                        .then((res) => {
+                            let timelineData = res.map(({ start, end, text }) => {
+                                return { start: start, end: end, text2: text };
+                            });
+
+                            let updatedTimelineData = res.map(({ start, end, text }) => {
+                                return { start: start, end: end, text: text };
+                            });
+
+                            var combinedArray = updatedTimelineData.map((obj, index) => ({
+                                ...obj,
+                                ...timelineData[index],
+                            }));
+
+                            let cleanedData = combinedArray.filter((res) => res.start !== res.end);
+
+                            clearSubs();
+
+                            setSubtitle(formatSub(cleanedData));
+                        })
+                        .catch((err) => {
+                            notify({
+                                message: err.message,
+                                level: 'error',
+                            });
+                        });
+                } else {
+                    notify({
+                        message: `${t('SUB_EXT_ERR')}: ${ext}`,
+                        level: 'error',
+                    });
+                }
+            }
+        },
+        [notify, setSubtitle, clearSubs],
+    );
+
+    const onInputClick = useCallback((event) => {
+        event.target.value = '';
+    }, []);
 
     const onTranslate = useCallback(() => {
         window.localStorage.setItem('lang', JSON.stringify(tempTranslate));
@@ -227,7 +316,7 @@ export default function Header({
                     console.log(error);
                 }
             }
-        }, 60000);
+        }, 60000000);
 
         return () => clearInterval(interval);
     }, [bookmarked, subtitleComment, subtitle]);
@@ -332,7 +421,7 @@ export default function Header({
                         <>
                             <select
                                 style={{
-                                    width: '15%',
+                                    width: '10%',
                                     marginRight: '10px',
                                     height: '35px',
                                     minHeight: '35px',
@@ -348,7 +437,7 @@ export default function Header({
                                 ))}
                             </select>
                             <div
-                                style={{ backgroundColor: '#673ab7', width: '10%' }}
+                                style={{ backgroundColor: '#673ab7', width: '7%' }}
                                 className="btn"
                                 onClick={onTranslate}
                             >
@@ -358,7 +447,7 @@ export default function Header({
                     )}
                     <select
                         style={{
-                            width: '15%',
+                            width: '10%',
                             marginRight: '10px',
                             height: '35px',
                             minHeight: '35px',
@@ -377,7 +466,7 @@ export default function Header({
                     </select>
 
                     <div
-                        style={{ backgroundColor: '#673ab7', width: '10%' }}
+                        style={{ backgroundColor: '#673ab7', width: '7%' }}
                         className="btn"
                         onClick={(e) => {
                             if (exportValue === 'SRT') {
@@ -392,6 +481,20 @@ export default function Header({
                         }}
                     >
                         <Translate value="Export" />
+                    </div>
+
+                    {/* <div className="import">
+                        <div className="btn">
+                            <Translate value="OPEN_SUB" />
+                            <input className="file" type="file" onChange={onSubtitleChange} onClick={onInputClick} />
+                        </div>
+                    </div> */}
+
+                    <div className="import">
+                        <div className="btn">
+                            <Translate value="OPEN_SUB" />
+                            <input className="file" type="file" onChange={onSubtitleChange} onClick={onInputClick} />
+                        </div>
                     </div>
 
                     <div
