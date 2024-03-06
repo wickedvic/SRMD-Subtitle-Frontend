@@ -8,8 +8,8 @@ import MergeIcon from '@mui/icons-material/Merge';
 import ChatIcon from '@mui/icons-material/Chat';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import { Button, Dialog, DialogActions, DialogContent } from '@mui/material';
-// import $ from 'jquery';
-
+import DraftEditor from '../components/DraftEditor';
+import { EditorState } from 'draft-js';
 const Style = styled.div`
     position: relative;
     box-shadow: 0px 5px 25px 5px rgb(0 0 0 / 80%);
@@ -18,6 +18,14 @@ const Style = styled.div`
     .ReactVirtualized__Table {
         .ReactVirtualized__Table__Grid {
             outline: none;
+        }
+
+        .public-DraftStyleDefault-block span {
+            color: rgb(255, 255, 255);
+            font-size: 16px !important;
+            text-align: center !important;
+            line-height: 22px !important;
+            display: block !important;
         }
 
         .ReactVirtualized__Table__row {
@@ -97,6 +105,7 @@ export default function Subtitles({
     setBookmarked,
     subtitleComment,
     setSubtitleComment,
+    numEditors,
 }) {
     const [height, setHeight] = useState(100);
 
@@ -121,6 +130,18 @@ export default function Subtitles({
         }
     }, [resize]);
     const videoProps = JSON.parse(localStorage.getItem('videoProps'));
+
+
+    const [editors, setEditors] = useState(Array.from({ length: numEditors }, () => EditorState.createEmpty()));
+
+    const handleShiftEnter = (index) => {
+        // Split into a new editor
+        const newEditors = [...editors];
+        newEditors.splice(index + 1, 0, EditorState.createEmpty());
+        setEditors(newEditors);
+    };
+
+   
 
     return (
         <>
@@ -380,7 +401,31 @@ export default function Subtitles({
                                             videoProps.translatedString === 'null' ||
                                             videoProps.translatedString === ' ' ||
                                             videoProps.translatedString === '') ? null : (
-                                            <textarea
+                                                <div className={[
+                                                'textarea',
+                                                currentIndex === props.index ? 'highlight' : '',
+                                                checkSub(props.rowData) ? 'illegal' : '',
+                                            ]
+                                                .join(' ')
+                                                .trim()}>
+                                            <DraftEditor style={{
+                                                fontSize: '16px',
+                                            }} initialContent={unescape(props.rowData.text)}
+                                            
+                                            
+                                            
+                                            //  onChange={(event) => {
+                                            //     updateSub(props.rowData, {
+                                            //         text2: event,
+                                            //     });
+                                                
+                                            // }}
+
+                                            onChange={(newEditorState) => updateSub(props.rowData, {text2: newEditorState})}
+                                            onShiftEnter={() => handleShiftEnter(props.rowData.index)}      
+                                            />
+
+                                            {/* <textarea
                                                 style={{
                                                     fontSize: '16px',
                                                 }}
@@ -398,10 +443,24 @@ export default function Subtitles({
                                                         text: event.target.value,
                                                     });
                                                 }}
-                                            />
+                                            /> */}
+                                            </div>
                                         )}
-
-                                        <textarea
+                                        <div className={[
+                                                'textarea',
+                                                currentIndex === props.index ? 'highlight' : '',
+                                                checkSub(props.rowData) ? 'illegal' : '',
+                                            ]
+                                                .join(' ')
+                                                .trim()}>
+                                            <DraftEditor style={{
+                                                fontSize: '16px',
+                                            }} initialContent={unescape(props.rowData.text2)} onChange={(event) => {
+                                                updateSub(props.rowData, {
+                                                    text2: event,
+                                                });
+                                            }}/>
+                                        {/* <textarea
                                             style={{
                                                 fontSize: '16px',
                                             }}
@@ -419,7 +478,8 @@ export default function Subtitles({
                                                     text2: event.target.value,
                                                 });
                                             }}
-                                        />
+                                        /> */}
+                                    </div>
                                     </div>
                                 </div>
                             );

@@ -128,7 +128,7 @@ const VideoWrap = memo(
         const onClick = useCallback(() => {
             if ($video.current) {
                 if (isPlaying($video.current)) {
-                    $video.current.pause();
+                    $video.current.play();
                 } else {
                     $video.current.play();
                 }
