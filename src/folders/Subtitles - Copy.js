@@ -10,6 +10,8 @@ import BookmarkIcon from '@mui/icons-material/Bookmark';
 import { Button, Dialog, DialogActions, DialogContent } from '@mui/material';
 import DraftEditor from '../components/DraftEditor';
 import { EditorState } from 'draft-js';
+
+
 const Style = styled.div`
     position: relative;
     box-shadow: 0px 5px 25px 5px rgb(0 0 0 / 80%);
@@ -107,14 +109,13 @@ export default function Subtitles({
     setSubtitleComment,
     numEditors,
 }) {
-
-    const [items, setItems] = useState([]);
-
     const [height, setHeight] = useState(100);
 
     const [anchorIndex, setAnchorIndex] = useState(null);
 
     const [open, setOpen] = React.useState(false);
+
+    const [items, setItems] = useState([]);
 
     const handleClose = () => {
         setOpen(false);
@@ -131,11 +132,12 @@ export default function Subtitles({
             const debounceResize = debounce(resize, 500);
             window.addEventListener('resize', debounceResize);
         }
+
+        
         setItems(subtitle);
 
 
-        console.log('items ->', items)
-    }, [resize, subtitle]);
+    }, [resize]);
     const videoProps = JSON.parse(localStorage.getItem('videoProps'));
 
 
@@ -166,6 +168,8 @@ export default function Subtitles({
 
     return (
         <>
+
+
             <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
                     {window.localStorage.getItem('lang') === null &&
@@ -205,7 +209,7 @@ export default function Subtitles({
                                     onClick={() => {
                                         if (!open) {
                                             if (player) {
-                                                player.pause();
+                                                player.play();
                                                 if (player.duration >= props.rowData.startTime) {
                                                     player.currentTime = props.rowData.startTime + 0.001;
                                                 }
@@ -432,18 +436,9 @@ export default function Subtitles({
                                             <DraftEditor style={{
                                                 fontSize: '16px',
                                             }} initialContent={unescape(props.rowData.text)}
-                                            
-                                            
-                                            
-                                            //  onChange={(event) => {
-                                            //     updateSub(props.rowData, {
-                                            //         text2: event,
-                                            //     });
-                                                
-                                            // }}
 
                                             onChange={(newEditorState) => updateSub(props.rowData, {text2: newEditorState})}
-                                            onShiftEnter={() => handleShiftEnter(props.rowData.index)}      
+                                            onKeyDown={(e) => handleKeyDown(e, props.rowData.index)}    
                                             />
 
                                             {/* <textarea
@@ -467,23 +462,7 @@ export default function Subtitles({
                                             /> */}
                                             </div>
                                         )}
-                                        <div className={[
-                                                'textarea',
-                                                currentIndex === props.index ? 'highlight' : '',
-                                                checkSub(props.rowData) ? 'illegal' : '',
-                                            ]
-                                                .join(' ')
-                                                .trim()}>
-                                            {/* <DraftEditor style={{
-                                                fontSize: '16px',
-                                            }} initialContent={unescape(props.rowData.text2)} 
-                                            onKeyDown={(e) => handleKeyDown(e, props.rowData.index)}
-                                            onChange={(event) => {
-                                                updateSub(props.rowData, {
-                                                    text2: event,
-                                                });
-                                            }}
-                                            /> */}
+                                        
                                         <textarea
                                             style={{
                                                 fontSize: '16px',
@@ -503,14 +482,16 @@ export default function Subtitles({
                                                     text2: event.target.value,
                                                 });
                                             }}
-                                        />
-                                    </div>
+                                        /> 
                                     </div>
                                 </div>
                             );
                         }}
                     ></Table>
                 </Style>
+
+
+                
             </div>
         </>
     );

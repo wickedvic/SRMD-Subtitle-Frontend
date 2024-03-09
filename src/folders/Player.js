@@ -2,9 +2,13 @@ import React, { useState, useEffect, createRef, useCallback, useMemo, memo } fro
 import TextareaAutosize from 'react-textarea-autosize';
 import { Translate } from 'react-i18nify';
 
+import { Player } from 'video-react';
+
 import styled from 'styled-components';
 
 import { isPlaying } from '../utils';
+
+import '../css/video-react.css';
 
 const Style = styled.div`
     display: flex;
@@ -147,13 +151,17 @@ const VideoWrap = memo(
                     ref={$video}
                     controls
                 ></video>
+
+                {/* <Player id="videoPlayer" className="videoPlayer" onClick={onClick} >
+                    <source src={`${videoProps.videoUrl}`}/>
+                </Player> */}
             </>
         );
     },
     () => true,
 );
 
-export default function Player(props) {
+export default function Players(props) {
     const [currentSub, setCurrentSub] = useState(null);
     const [focusing, setFocusing] = useState(false);
     const [inputItemCursor, setInputItemCursor] = useState(0);
