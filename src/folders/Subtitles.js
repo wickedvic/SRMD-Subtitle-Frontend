@@ -1,5 +1,6 @@
 import styled from 'styled-components';
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState,useEffect, useCallback, useRef } from 'react';
+
 import { Table } from 'react-virtualized';
 import unescape from 'lodash/unescape';
 import debounce from 'lodash/debounce';
@@ -8,8 +9,11 @@ import MergeIcon from '@mui/icons-material/Merge';
 import ChatIcon from '@mui/icons-material/Chat';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import { Button, Dialog, DialogActions, DialogContent } from '@mui/material';
-import DraftEditor from '../components/DraftEditor';
-import { EditorState } from 'draft-js';
+
+
+import $ from 'jquery';
+import 'jquery-ui/themes/base/all.css'; 
+
 const Style = styled.div`
     position: relative;
     box-shadow: 0px 5px 25px 5px rgb(0 0 0 / 80%);
@@ -109,6 +113,8 @@ export default function Subtitles({
 }) {
 
     const [items, setItems] = useState([]);
+    const [caretPos, setCaretPos] = useState('');
+    const stateStack = useRef([]);
 
     const [height, setHeight] = useState(100);
 
@@ -133,36 +139,40 @@ export default function Subtitles({
         }
         setItems(subtitle);
 
-
-        console.log('items ->', items)
+        console.log(subtitle)
+        $('#editable-list').on('keydown', 'li', function(e) {
+          if (e.shiftKey && e.which === 13) {
+              e.preventDefault();
+              var posCaret = getCaretCharacterOffsetWithin(this);
+              setCaretPos(posCaret);
+          }
+        });
+  
+        function getCaretCharacterOffsetWithin(element) {
+          var caretOffset = 0;
+          var doc = element.ownerDocument || element.document;
+          var win = doc.defaultView || doc.parentWindow;
+          var sel;
+          if (typeof win.getSelection !== 'undefined') {
+              sel = win.getSelection();
+              if (sel.rangeCount > 0) {
+                  var range = win.getSelection().getRangeAt(0);
+                  var preCaretRange = range.cloneRange();
+                  preCaretRange.selectNodeContents(element);
+                  preCaretRange.setEnd(range.endContainer, range.endOffset);
+                  caretOffset = preCaretRange.toString().length;
+              }
+          } else if ((sel = doc.selection) && sel.type !== 'Control') {
+              var textRange = sel.createRange();
+              var preCaretTextRange = doc.body.createTextRange();
+              preCaretTextRange.moveToElementText(element);
+              preCaretTextRange.setEndPoint('EndToEnd', textRange);
+              caretOffset = preCaretTextRange.text.length;
+          }
+          return caretOffset;
+      }
     }, [resize, subtitle]);
     const videoProps = JSON.parse(localStorage.getItem('videoProps'));
-
-
-    const [editors, setEditors] = useState(Array.from({ length: numEditors }, () => EditorState.createEmpty()));
-
-    const handleShiftEnter = (index) => {
-        // Split into a new editor
-        const newEditors = [...editors];
-        newEditors.splice(index + 1, 0, EditorState.createEmpty());
-        setEditors(newEditors);
-    };
-
-    const handleKeyDown = (event, index) => {
-        if (event.key === 'Enter' && event.shiftKey) {
-          // If Shift + Enter is pressed, split the content into a new list item
-          event.preventDefault();
-          const newItems = [...items];
-          newItems.splice(index + 1, 0, '');
-          setItems(newItems);
-        }
-      };
-    
-      const handleChange = (event, index) => {
-        const newItems = [...items];
-        newItems[index] = event.target.value;
-        setItems(newItems);
-      };
 
     return (
         <>
@@ -187,7 +197,7 @@ export default function Subtitles({
                     )}
                 </div>
                 <Style className="subtitles">
-                    <Table
+                    <Table id='editable-list'
                         headerHeight={20}
                         width={750}
                         height={height}
@@ -198,9 +208,9 @@ export default function Subtitles({
                         headerRowRenderer={() => null}
                         rowRenderer={(props) => {
                             return (
-                                <div
+                                <div 
                                     key={props.key}
-                                    className={props.className}
+                                    className={`${props.className} itemsalist`}
                                     style={props.style}
                                     onClick={() => {
                                         if (!open) {
@@ -234,7 +244,6 @@ export default function Subtitles({
                                                 }}
                                                 onClick={(event) => {
                                                     setOpen(true);
-
                                                     setAnchorIndex(props.index);
                                                 }}
                                             />
@@ -410,11 +419,6 @@ export default function Subtitles({
                                                           ?.split('\n')
                                                           ?.map((e) => e.length)}`
                                             }
-                                            // onChange={(event) => {
-                                            //     updateSub(props.rowData, {
-                                            //         text: event.target.value,
-                                            //     });
-                                            // }}
                                         />
 
                                         {window.localStorage.getItem('lang') === null &&
@@ -422,69 +426,29 @@ export default function Subtitles({
                                             videoProps.translatedString === 'null' ||
                                             videoProps.translatedString === ' ' ||
                                             videoProps.translatedString === '') ? null : (
-                                                <div className={[
+
+                                                <textarea
+                                            style={{
+                                                fontSize: '16px',
+                                            }}
+                                            spellcheck="true"
+                                            className={[
                                                 'textarea',
                                                 currentIndex === props.index ? 'highlight' : '',
                                                 checkSub(props.rowData) ? 'illegal' : '',
                                             ]
                                                 .join(' ')
-                                                .trim()}>
-                                            <DraftEditor style={{
-                                                fontSize: '16px',
-                                            }} initialContent={unescape(props.rowData.text)}
-                                            
-                                            
-                                            
-                                            //  onChange={(event) => {
-                                            //     updateSub(props.rowData, {
-                                            //         text2: event,
-                                            //     });
-                                                
-                                            // }}
-
-                                            onChange={(newEditorState) => updateSub(props.rowData, {text2: newEditorState})}
-                                            onShiftEnter={() => handleShiftEnter(props.rowData.index)}      
-                                            />
-
-                                            {/* <textarea
-                                                style={{
-                                                    fontSize: '16px',
-                                                }}
-                                                spellcheck="true"
-                                                className={[
-                                                    'textarea',
-                                                    currentIndex === props.index ? 'highlight' : '',
-                                                    checkSub(props.rowData) ? 'illegal' : '',
-                                                ]
-                                                    .join(' ')
-                                                    .trim()}
-                                                value={unescape(props.rowData.text)}
-                                                onChange={(event) => {
-                                                    updateSub(props.rowData, {
-                                                        text: event.target.value,
-                                                    });
-                                                }}
-                                            /> */}
-                                            </div>
-                                        )}
-                                        <div className={[
-                                                'textarea',
-                                                currentIndex === props.index ? 'highlight' : '',
-                                                checkSub(props.rowData) ? 'illegal' : '',
-                                            ]
-                                                .join(' ')
-                                                .trim()}>
-                                            {/* <DraftEditor style={{
-                                                fontSize: '16px',
-                                            }} initialContent={unescape(props.rowData.text2)} 
-                                            onKeyDown={(e) => handleKeyDown(e, props.rowData.index)}
+                                                .trim()}
+                                            value={unescape(props.rowData.text)}
                                             onChange={(event) => {
                                                 updateSub(props.rowData, {
-                                                    text2: event,
+                                                    text: event.target.value,
                                                 });
                                             }}
-                                            /> */}
-                                        <textarea
+                                        /> 
+                                        )}
+                                            
+                                         <textarea
                                             style={{
                                                 fontSize: '16px',
                                             }}
@@ -497,14 +461,12 @@ export default function Subtitles({
                                                 .join(' ')
                                                 .trim()}
                                             value={unescape(props.rowData.text2)}
-                                            onKeyDown={(e) => handleKeyDown(e, props.rowData.index)}
                                             onChange={(event) => {
                                                 updateSub(props.rowData, {
                                                     text2: event.target.value,
                                                 });
                                             }}
-                                        />
-                                    </div>
+                                        /> 
                                     </div>
                                 </div>
                             );

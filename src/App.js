@@ -19,7 +19,7 @@ import Typography from '@mui/material/Typography';
 import Login from './components/Login';
 import Register from './components/Register';
 
-import Details from './folders/DetailsPage/Details';
+import EditableList from './folders/DetailsPage/Details';
 
 import 'core-js';
 import 'normalize.css';
@@ -256,7 +256,7 @@ const App = () => {
                             <Route exact path="/videos/edit" element={<VideoPlayerApp defaultLang={defaultLang} />} />
 
                             <Route exact path="/help" element={<Help />} />
-                            <Route exact path="/details" element={<Details />} />
+                            <Route exact path="/details" element={<EditableList />} />
 
                             <Route path="*" element={<Navigate to="/videos" />} />
                         </Routes>
