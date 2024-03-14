@@ -10,9 +10,7 @@ import ChatIcon from '@mui/icons-material/Chat';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import { Button, Dialog, DialogActions, DialogContent } from '@mui/material';
 
-
 import $ from 'jquery';
-import 'jquery-ui/themes/base/all.css'; 
 
 const Style = styled.div`
     position: relative;
@@ -139,40 +137,84 @@ export default function Subtitles({
         }
         setItems(subtitle);
 
-        console.log(subtitle)
-        $('#editable-list').on('keydown', 'li', function(e) {
-          if (e.shiftKey && e.which === 13) {
-              e.preventDefault();
-              var posCaret = getCaretCharacterOffsetWithin(this);
-              setCaretPos(posCaret);
-          }
-        });
-  
-        function getCaretCharacterOffsetWithin(element) {
-          var caretOffset = 0;
-          var doc = element.ownerDocument || element.document;
-          var win = doc.defaultView || doc.parentWindow;
-          var sel;
-          if (typeof win.getSelection !== 'undefined') {
-              sel = win.getSelection();
-              if (sel.rangeCount > 0) {
-                  var range = win.getSelection().getRangeAt(0);
-                  var preCaretRange = range.cloneRange();
-                  preCaretRange.selectNodeContents(element);
-                  preCaretRange.setEnd(range.endContainer, range.endOffset);
-                  caretOffset = preCaretRange.toString().length;
-              }
-          } else if ((sel = doc.selection) && sel.type !== 'Control') {
-              var textRange = sel.createRange();
-              var preCaretTextRange = doc.body.createTextRange();
-              preCaretTextRange.moveToElementText(element);
-              preCaretTextRange.setEndPoint('EndToEnd', textRange);
-              caretOffset = preCaretTextRange.text.length;
-          }
-          return caretOffset;
+        
+      $('#editable-list').on('keydown', '.itemsalist', function(e) {
+        if (e.shiftKey && e.which === 13) {
+            e.preventDefault();
+            var posCaret = getCaretCharacterOffsetWithin(this);
+            setCaretPos(posCaret);
+        }
+      });
+
+      function getCaretCharacterOffsetWithin(element) {
+        var caretOffset = 0;
+        var doc = element.ownerDocument || element.document;
+        var win = doc.defaultView || doc.parentWindow;
+        var sel;
+        if (typeof win.getSelection !== 'undefined') {
+            sel = win.getSelection();
+            if (sel.rangeCount > 0) {
+                var range = win.getSelection().getRangeAt(0);
+                var preCaretRange = range.cloneRange();
+                preCaretRange.selectNodeContents(element);
+                preCaretRange.setEnd(range.endContainer, range.endOffset);
+                caretOffset = preCaretRange.toString().length;
+            }
+        } else if ((sel = doc.selection) && sel.type !== 'Control') {
+            var textRange = sel.createRange();
+            var preCaretTextRange = doc.body.createTextRange();
+            preCaretTextRange.moveToElementText(element);
+            preCaretTextRange.setEndPoint('EndToEnd', textRange);
+            caretOffset = preCaretTextRange.text.length;
+        }
+        return caretOffset;
       }
+
+
     }, [resize, subtitle]);
     const videoProps = JSON.parse(localStorage.getItem('videoProps'));
+
+    const handleKeyDown = (e, index, field) => {
+        if (e.shiftKey && e.key === 'Enter') {
+            e.preventDefault();
+            const text = e.target.value;
+            const selection = window.getSelection();
+            const caretOffset = selection.anchorOffset;
+            const newTextBefore = text.substring(0, caretOffset).trim();
+            const newTextAfter = text.substring(caretOffset).trim();
+            const newItems = [
+                ...items.slice(0, index),
+                { ...items[index], [field]: newTextBefore },
+                { ...items[index], [field]: newTextAfter },
+                ...items.slice(index + 1)
+            ];
+            setItems(newItems);
+            stateStack.current.push(newItems);
+        } else if (e.key === 'ArrowUp' && index > 0) {
+            e.preventDefault();
+            document.querySelectorAll('.items')[index - 1].querySelector(`[data-field="${field}"]`).focus();
+        } else if (e.key === 'ArrowDown' && index < items.length - 1) {
+            e.preventDefault();
+            document.querySelectorAll('.items')[index + 1].querySelector(`[data-field="${field}"]`).focus();
+        }
+      };
+      
+      
+      const handleBlur = (e, index, field) => {
+      const newText = e.target.value.trim();
+      
+      const itemslist = {
+        "start": items[index].start,
+        "end": items[index].end,
+        "text": field==="text" ? newText: items[index].text,
+        "text2": field==="text2" ? newText: items[index].text2,
+      }
+      
+      const newItems = [...items.slice(0, index), itemslist, ...items.slice(index + 1)];
+      
+      setItems(newItems);
+      stateStack.current.push(newItems);
+      }
 
     return (
         <>
@@ -207,6 +249,7 @@ export default function Subtitles({
                         rowGetter={({ index }) => items[index]}
                         headerRowRenderer={() => null}
                         rowRenderer={(props) => {
+                            console.log(props)
                             return (
                                 <div 
                                     key={props.key}
@@ -215,8 +258,9 @@ export default function Subtitles({
                                     onClick={() => {
                                         if (!open) {
                                             if (player) {
-                                                player.pause();
-                                                if (player.duration >= props.rowData.startTime) {
+                                                player.play();
+                                                if (player.duration >= props.rowData.startTime) 
+                                                {
                                                     player.currentTime = props.rowData.startTime + 0.001;
                                                 }
                                             }
@@ -439,6 +483,9 @@ export default function Subtitles({
                                             ]
                                                 .join(' ')
                                                 .trim()}
+                                            onKeyDown={(e) => handleKeyDown(e, props.index, 'text')}
+                                            onBlur={(e) => handleBlur(e, props.index, 'text')}
+                                            data-field="text"
                                             value={unescape(props.rowData.text)}
                                             onChange={(event) => {
                                                 updateSub(props.rowData, {
@@ -460,6 +507,10 @@ export default function Subtitles({
                                             ]
                                                 .join(' ')
                                                 .trim()}
+
+                                            onKeyDown={(e) => handleKeyDown(e, props.index, 'text2')}
+                                            onBlur={(e) => handleBlur(e, props.index, 'text2')}
+                                            data-field="text2"
                                             value={unescape(props.rowData.text2)}
                                             onChange={(event) => {
                                                 updateSub(props.rowData, {
