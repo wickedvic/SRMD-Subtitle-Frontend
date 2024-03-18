@@ -4,17 +4,11 @@
 	padding: 50px;
     box-sizing: border-box;
 }
-.listboxs ul, .listboxs li {
-	margin: 0;
-	padding: 0;
-	display: block;
-	box-sizing: border-box;
-    list-style: none;
-}
-#editable-list ul {
+
+#editablelist .item {
 	display: flex;
 }
-#editable-list ul li {
+#editablelist textarea {
 	flex: 0 0 33.3333%;
 	border: 1px solid #000;
 	margin: 5px;

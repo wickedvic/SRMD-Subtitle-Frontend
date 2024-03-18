@@ -111,7 +111,6 @@ export default function Subtitles({
 }) {
 
     const [items, setItems] = useState([]);
-    const [caretPos, setCaretPos] = useState('');
     const stateStack = useRef([]);
 
     const [height, setHeight] = useState(100);
@@ -128,7 +127,8 @@ export default function Subtitles({
         setHeight(document.body.clientHeight - 170);
     }, [setHeight]);
 
-    useEffect(() => {
+    useEffect(() => 
+    {
         resize();
         if (!resize.init) {
             resize.init = true;
@@ -137,84 +137,80 @@ export default function Subtitles({
         }
         setItems(subtitle);
 
-        
-      $('#editable-list').on('keydown', '.itemsalist', function(e) {
-        if (e.shiftKey && e.which === 13) {
-            e.preventDefault();
-            var posCaret = getCaretCharacterOffsetWithin(this);
-            setCaretPos(posCaret);
-        }
-      });
-
-      function getCaretCharacterOffsetWithin(element) {
-        var caretOffset = 0;
-        var doc = element.ownerDocument || element.document;
-        var win = doc.defaultView || doc.parentWindow;
-        var sel;
-        if (typeof win.getSelection !== 'undefined') {
-            sel = win.getSelection();
-            if (sel.rangeCount > 0) {
-                var range = win.getSelection().getRangeAt(0);
-                var preCaretRange = range.cloneRange();
-                preCaretRange.selectNodeContents(element);
-                preCaretRange.setEnd(range.endContainer, range.endOffset);
-                caretOffset = preCaretRange.toString().length;
+        $('#editable-list').on('keydown', '.itemsalist textarea', function(e) {
+       
+            var curentnode = $(this).parent().parent();
+            var nextnode = $(this).parent().parent().next();
+            var prevnode = $(this).parent().parent().prev();
+            
+            if (e.keyCode===40) {
+                    $('.itemsalist textarea').removeClass('highlight');
+                    nextnode.find('textarea').addClass('highlight');
+                    nextnode.find('textarea[data-field="text2"]').focus();
+                    nextnode.find('textarea[data-field="text2"]').click();               
             }
-        } else if ((sel = doc.selection) && sel.type !== 'Control') {
-            var textRange = sel.createRange();
-            var preCaretTextRange = doc.body.createTextRange();
-            preCaretTextRange.moveToElementText(element);
-            preCaretTextRange.setEndPoint('EndToEnd', textRange);
-            caretOffset = preCaretTextRange.text.length;
-        }
-        return caretOffset;
-      }
 
+            if (e.keyCode===38) {
+                if ($(curentnode).hasClass("item_1")) 
+                {
+                }
+                else 
+                {
+                    $('.itemsalist textarea').removeClass('highlight');
+                    prevnode.find('textarea').addClass('highlight');
+                    prevnode.find('textarea[data-field="text2"]').focus();
+                    prevnode.find('textarea[data-field="text2"]').click();
+                }
+            }
+        });
 
     }, [resize, subtitle]);
     const videoProps = JSON.parse(localStorage.getItem('videoProps'));
 
-    const handleKeyDown = (e, index, field) => {
+    const handleKeyDown = (e, index, field) => 
+    {
         if (e.shiftKey && e.key === 'Enter') {
             e.preventDefault();
+  
+            if(field==='text' || field==='text2')
+            {
+  
             const text = e.target.value;
-            const selection = window.getSelection();
-            const caretOffset = selection.anchorOffset;
+            const caretOffset = e.target.selectionStart;
             const newTextBefore = text.substring(0, caretOffset).trim();
             const newTextAfter = text.substring(caretOffset).trim();
             const newItems = [
                 ...items.slice(0, index),
-                { ...items[index], [field]: newTextBefore },
-                { ...items[index], [field]: newTextAfter },
+                { ...items[index], ['text']: newTextBefore, ['text2']: newTextBefore },
+                { ...items[index], ['text']: newTextAfter, ['text2']: newTextAfter },
                 ...items.slice(index + 1)
             ];
             setItems(newItems);
             stateStack.current.push(newItems);
-        } else if (e.key === 'ArrowUp' && index > 0) {
-            e.preventDefault();
-            document.querySelectorAll('.items')[index - 1].querySelector(`[data-field="${field}"]`).focus();
-        } else if (e.key === 'ArrowDown' && index < items.length - 1) {
-            e.preventDefault();
-            document.querySelectorAll('.items')[index + 1].querySelector(`[data-field="${field}"]`).focus();
+          }
         }
-      };
-      
-      
-      const handleBlur = (e, index, field) => {
-      const newText = e.target.value.trim();
-      
-      const itemslist = {
-        "start": items[index].start,
-        "end": items[index].end,
-        "text": field==="text" ? newText: items[index].text,
-        "text2": field==="text2" ? newText: items[index].text2,
-      }
-      
-      const newItems = [...items.slice(0, index), itemslist, ...items.slice(index + 1)];
-      
-      setItems(newItems);
-      stateStack.current.push(newItems);
-      }
+    };
+  
+    const handleChangeText = (e, index, field) => 
+    {
+        const text = e.target.value;
+        const newItems = [...items];
+        if(field==='text' || field==='text2')
+        {
+          newItems[index] = { ...newItems[index], text: text,  text2: text };
+        }
+  
+        if(field==='start')
+        {
+          newItems[index] = { ...newItems[index], start: text};
+        }
+  
+        if(field==='end')
+        {
+          newItems[index] = { ...newItems[index], end: text};
+        }
+        setItems(newItems);
+    };
 
     return (
         <>
@@ -249,16 +245,15 @@ export default function Subtitles({
                         rowGetter={({ index }) => items[index]}
                         headerRowRenderer={() => null}
                         rowRenderer={(props) => {
-                            console.log(props)
                             return (
                                 <div 
                                     key={props.key}
-                                    className={`${props.className} itemsalist`}
+                                    className={`${props.className} itemsalist item_${props.index+1}`}
                                     style={props.style}
                                     onClick={() => {
                                         if (!open) {
                                             if (player) {
-                                                player.play();
+                                                player.pause();
                                                 if (player.duration >= props.rowData.startTime) 
                                                 {
                                                     player.currentTime = props.rowData.startTime + 0.001;
@@ -444,6 +439,8 @@ export default function Subtitles({
                                                 .join(' ')
                                                 .trim()}
                                             value={
+                                                props?.rowData?.startTime === undefined ||
+                                                props?.rowData?.endTime === undefined ||
                                                 props?.rowData?.text === undefined ||
                                                 props?.rowData?.text2 === undefined
                                                     ? `0/0`
@@ -471,49 +468,32 @@ export default function Subtitles({
                                             videoProps.translatedString === ' ' ||
                                             videoProps.translatedString === '') ? null : (
 
-                                                <textarea
-                                            style={{
-                                                fontSize: '16px',
-                                            }}
-                                            spellcheck="true"
-                                            className={[
-                                                'textarea',
-                                                currentIndex === props.index ? 'highlight' : '',
-                                                checkSub(props.rowData) ? 'illegal' : '',
-                                            ]
-                                                .join(' ')
-                                                .trim()}
+                                            <textarea style={{fontSize: '16px',}}
+                                            spellCheck="true"
+                                            className={['textarea',currentIndex === props.index ? 'highlight' : '',checkSub(props.rowData) ? 'illegal' : '',].join(' ').trim()}
+                                        
                                             onKeyDown={(e) => handleKeyDown(e, props.index, 'text')}
-                                            onBlur={(e) => handleBlur(e, props.index, 'text')}
                                             data-field="text"
                                             value={unescape(props.rowData.text)}
                                             onChange={(event) => {
                                                 updateSub(props.rowData, {
                                                     text: event.target.value,
+                                                    text2: event.target.value,
                                                 });
                                             }}
                                         /> 
                                         )}
                                             
-                                         <textarea
-                                            style={{
-                                                fontSize: '16px',
-                                            }}
-                                            spellcheck="true"
-                                            className={[
-                                                'textarea',
-                                                currentIndex === props.index ? 'highlight' : '',
-                                                checkSub(props.rowData) ? 'illegal' : '',
-                                            ]
-                                                .join(' ')
-                                                .trim()}
+                                         <textarea style={{fontSize: '16px',}}
+                                            spellCheck="true"
+                                            className={['textarea',currentIndex === props.index ? 'highlight' : '',checkSub(props.rowData) ? 'illegal' : '',].join(' ').trim()}
 
                                             onKeyDown={(e) => handleKeyDown(e, props.index, 'text2')}
-                                            onBlur={(e) => handleBlur(e, props.index, 'text2')}
                                             data-field="text2"
                                             value={unescape(props.rowData.text2)}
                                             onChange={(event) => {
                                                 updateSub(props.rowData, {
+                                                    text: event.target.value,
                                                     text2: event.target.value,
                                                 });
                                             }}
