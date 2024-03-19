@@ -95,6 +95,7 @@ const Style = styled.div`
 export default function Subtitles({
     currentIndex,
     subtitle,
+    setSubtitle,
     checkSub,
     player,
     updateSub,
@@ -109,9 +110,8 @@ export default function Subtitles({
     setSubtitleComment,
     numEditors,
 }) {
-
-    const [items, setItems] = useState([]);
-    const stateStack = useRef([]);
+    
+    //const stateStack = useRef([]);
 
     const [height, setHeight] = useState(100);
 
@@ -135,7 +135,7 @@ export default function Subtitles({
             const debounceResize = debounce(resize, 500);
             window.addEventListener('resize', debounceResize);
         }
-        setItems(subtitle);
+        
 
         $('#editable-list').on('keydown', '.itemsalist textarea', function(e) {
        
@@ -180,13 +180,13 @@ export default function Subtitles({
             const newTextBefore = text.substring(0, caretOffset).trim();
             const newTextAfter = text.substring(caretOffset).trim();
             const newItems = [
-                ...items.slice(0, index),
-                { ...items[index], ['text']: newTextBefore, ['text2']: newTextBefore },
-                { ...items[index], ['text']: newTextAfter, ['text2']: newTextAfter },
-                ...items.slice(index + 1)
+                ...subtitle.slice(0, index),
+                { ...subtitle[index], ['text']: newTextBefore, ['text2']: newTextBefore },
+                { ...subtitle[index], ['text']: newTextAfter, ['text2']: newTextAfter },
+                ...subtitle.slice(index + 1)
             ];
-            setItems(newItems);
-            stateStack.current.push(newItems);
+            setSubtitle(newItems);
+            //stateStack.current.push(newItems);
           }
         }
     };
@@ -194,7 +194,7 @@ export default function Subtitles({
     const handleChangeText = (e, index, field) => 
     {
         const text = e.target.value;
-        const newItems = [...items];
+        const newItems = [...subtitle];
         if(field==='text' || field==='text2')
         {
           newItems[index] = { ...newItems[index], text: text,  text2: text };
@@ -209,7 +209,7 @@ export default function Subtitles({
         {
           newItems[index] = { ...newItems[index], end: text};
         }
-        setItems(newItems);
+        setSubtitle(newItems);
     };
 
     return (
@@ -241,10 +241,11 @@ export default function Subtitles({
                         height={height}
                         rowHeight={100}
                         scrollToIndex={currentIndex}
-                        rowCount={items.length}
-                        rowGetter={({ index }) => items[index]}
+                        rowCount={subtitle.length}
+                        rowGetter={({ index }) => subtitle[index]}
                         headerRowRenderer={() => null}
                         rowRenderer={(props) => {
+                            console.log(props)
                             return (
                                 <div 
                                     key={props.key}
@@ -393,6 +394,52 @@ export default function Subtitles({
                                                 onClick={() => removeSub(props.rowData)}
                                             />
                                         </div>
+
+                                        {/* <div className={[
+                                                'textarea',
+                                                currentIndex === props.index ? 'highlight' : '',
+                                                checkSub(props.rowData) ? 'illegal' : '',
+
+                                                viewEng &&
+                                                ((props?.rowData?.text?.length / props?.rowData?.duration).toFixed(0) >
+                                                    28 ||
+                                                    props?.rowData?.text?.split('\n')?.map((e) => e.length) > 55)
+                                                    ? 'cplOrange'
+                                                    : '',
+
+                                                !viewEng &&
+                                                ((props?.rowData?.text2?.length / props?.rowData?.duration).toFixed(0) >
+                                                    28 ||
+                                                    props?.rowData?.text2?.split('\n')?.map((e) => e.length) > 55)
+                                                    ? 'cplOrange'
+                                                    : '',
+
+                                                viewEng &&
+                                                ((props?.rowData?.text?.length / props?.rowData?.duration).toFixed(0) >
+                                                    24 ||
+                                                    props?.rowData?.text?.split('\n')?.map((e) => e.length) > 45)
+                                                    ? 'cplYellow'
+                                                    : '',
+
+                                                !viewEng &&
+                                                ((props?.rowData?.text2?.length / props?.rowData?.duration).toFixed(0) >
+                                                    24 ||
+                                                    props?.rowData?.text2?.split('\n')?.map((e) => e.length) > 45)
+                                                    ? 'cplYellow'
+                                                    : '',
+                                            ]
+                                                .join(' ')
+                                                .trim()}
+                                                style={{
+                                                width: '150px',
+                                                textAlign: 'center',
+                                                paddingTop: '5px',
+                                                fontSize: '12px',
+                                            }}
+                                                >
+                                                    <input type='text' value={props.rowData.start.split(':')} /> - 
+                                                    <input type='text' value={props.rowData.end.split(':')} /> seconds
+                                                </div> */}
 
                                         <textarea
                                             disabled={true}
