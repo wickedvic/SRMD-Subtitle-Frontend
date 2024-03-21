@@ -10,6 +10,7 @@ import ChatIcon from '@mui/icons-material/Chat';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import { Button, Dialog, DialogActions, DialogContent } from '@mui/material';
 
+
 import $ from 'jquery';
 
 const Style = styled.div`
@@ -20,6 +21,25 @@ const Style = styled.div`
     .ReactVirtualized__Table {
         .ReactVirtualized__Table__Grid {
             outline: none;
+        }
+
+        .imputs input {
+            width: 100% !important;
+            display: block !important;
+            background: transparent !important;
+            border: medium !important;
+            color: rgb(255, 255, 255) !important;
+            text-align: center;
+        }
+        .textarea.imputs * {
+            line-height: normal;
+            display: block;
+        }
+        .imputs {
+            display: block !important;
+            overflow: hidden;
+            overflow-y: auto;
+            width: 220px !important;
         }
 
         .public-DraftStyleDefault-block span {
@@ -144,8 +164,8 @@ export default function Subtitles({
             var prevnode = $(this).parent().parent().prev();
             
             if (e.keyCode===40) {
-                    $('.itemsalist textarea').removeClass('highlight');
-                    nextnode.find('textarea').addClass('highlight');
+                    $('.itemsalist .textarea').removeClass('highlight');
+                    nextnode.find('.textarea').addClass('highlight');
                     nextnode.find('textarea[data-field="text2"]').focus();
                     nextnode.find('textarea[data-field="text2"]').click();               
             }
@@ -156,13 +176,20 @@ export default function Subtitles({
                 }
                 else 
                 {
-                    $('.itemsalist textarea').removeClass('highlight');
-                    prevnode.find('textarea').addClass('highlight');
+                    $('.itemsalist .textarea').removeClass('highlight');
+                    prevnode.find('.textarea').addClass('highlight');
                     prevnode.find('textarea[data-field="text2"]').focus();
                     prevnode.find('textarea[data-field="text2"]').click();
                 }
             }
         });
+
+        // $('#editable-list').on('click', '.itemsalist .textarea', function(e) 
+        // {
+        //     var curentnode = $(this).parent().parent();            
+        //     $('.itemsalist .textarea').removeClass('highlight');
+        //     curentnode.find('.textarea').addClass('highlight');
+        // });
 
     }, [resize, subtitle]);
     const videoProps = JSON.parse(localStorage.getItem('videoProps'));
@@ -212,6 +239,8 @@ export default function Subtitles({
         setSubtitle(newItems);
     };
 
+    
+
     return (
         <>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -254,7 +283,8 @@ export default function Subtitles({
                                     onClick={() => {
                                         if (!open) {
                                             if (player) {
-                                                player.pause();
+                                                player.play();
+                                                //player.pause();
                                                 if (player.duration >= props.rowData.startTime) 
                                                 {
                                                     player.currentTime = props.rowData.startTime + 0.001;
@@ -395,8 +425,8 @@ export default function Subtitles({
                                             />
                                         </div>
 
-                                        {/* <div className={[
-                                                'textarea',
+                                        <div className={[
+                                                'textarea imputs',
                                                 currentIndex === props.index ? 'highlight' : '',
                                                 checkSub(props.rowData) ? 'illegal' : '',
 
@@ -437,11 +467,32 @@ export default function Subtitles({
                                                 fontSize: '12px',
                                             }}
                                                 >
-                                                    <input type='text' value={props.rowData.start.split(':')} /> - 
-                                                    <input type='text' value={props.rowData.end.split(':')} /> seconds
-                                                </div> */}
+                                                        <input type='text' 
+                                                             data-field="start"
+                                                            onKeyDown={(e) => handleKeyDown(e, props.index, 'start')}
+                                                            value={props.rowData.start.replace('00:00:', '').replace('00:', '')} 
+                                                            onChange={(event) => {
+                                                                updateSub(props.rowData, {
+                                                                    start: event.target.value,                                                                    
+                                                                });
+                                                            }}
+                                                        />
+                                                        <span>-</span> 
+                                                        <input type='text' 
+                                                            data-field="end"
+                                                            onKeyDown={(e) => handleKeyDown(e, props.index, 'end')}
+                                                            value={props.rowData.end.replace('00:00:', '').replace('00:', '')} 
+                                                            onChange={(event) => {
+                                                                updateSub(props.rowData, {
+                                                                    end: event.target.value,                                                                    
+                                                                });
+                                                            }}
+                                                        />
+                                                        <span>seconds</span>
+                                                    </div>
+                                               
 
-                                        <textarea
+                                        {/* <textarea
                                             disabled={true}
                                             style={{
                                                 width: '150px',
@@ -507,7 +558,7 @@ export default function Subtitles({
                                                           ?.split('\n')
                                                           ?.map((e) => e.length)}`
                                             }
-                                        />
+                                        /> */}
 
                                         {window.localStorage.getItem('lang') === null &&
                                         (videoProps.translatedString === null ||
