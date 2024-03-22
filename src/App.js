@@ -109,18 +109,12 @@ const App = () => {
                                     className="SRMD-img"
                                     src={'/SRMD-Logo.png'}
                                     alt="SRMD_Logo"
-                                ></img>
+                                />
                             </Typography>
                         </Toolbar>
                     </Container>
                 </AppBar>
-                <Backdrop
-                    sx={{
-                        color: '#FFF',
-                        zIndex: (theme) => theme.zIndex.drawer + 1,
-                    }}
-                    open={isLoading}
-                >
+                <Backdrop sx={{color: '#FFF',zIndex: (theme) => theme.zIndex.drawer + 1}} open={isLoading}>
                     <CircularProgress color="inherit" />
                 </Backdrop>
             </>
@@ -154,7 +148,7 @@ const App = () => {
                                             className="SRMD-img"
                                             src={'/SRMD-Logo.png'}
                                             alt="SRMD_Logo"
-                                        ></img>
+                                        />
                                     </Typography>
                                 </Toolbar>
                             </Container>
@@ -191,20 +185,16 @@ const App = () => {
                                             className="SRMD-img"
                                             src={'/SRMD-Logo.png'}
                                             alt="SRMD_Logo"
-                                        ></img>
+                                        />
                                     </Typography>
 
                                     <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                                         {pages.map((page) => (
-                                            <Button
-                                                key={page}
+                                            <Button key={page} 
                                                 onClick={(e) => {
                                                     handleCloseNavMenu(page);
                                                 }}
-                                                sx={{ my: 2, color: 'white', display: 'block' }}
-                                            >
-                                                {page}
-                                            </Button>
+                                                sx={{ my: 2, color: 'white', display: 'block' }}>{page}</Button>
                                         ))}
                                     </Box>
 
@@ -216,8 +206,7 @@ const App = () => {
                                                 <Avatar src="/static/images/avatar/2.jpg" />
                                             </IconButton>
                                         </Tooltip>
-                                        <Menu
-                                            sx={{ mt: '45px' }}
+                                        <Menu sx={{mt:'45px'}}
                                             id="menu-appbar"
                                             anchorEl={anchorElUser}
                                             anchorOrigin={{
@@ -230,8 +219,7 @@ const App = () => {
                                                 horizontal: 'right',
                                             }}
                                             open={Boolean(anchorElUser)}
-                                            onClose={handleCloseUserMenu}
-                                        >
+                                            onClose={handleCloseUserMenu}>
                                             {settings.map((setting) => (
                                                 <MenuItem
                                                     key={setting}
@@ -264,6 +252,5 @@ const App = () => {
                 )}
             </Router>
         );
-};
-
+}
 export default App;

@@ -1,13 +1,8 @@
 import React, { useState, useEffect, createRef, useCallback, useMemo, memo } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
 import { Translate } from 'react-i18nify';
-
-import { Player } from 'video-react';
-
 import styled from 'styled-components';
-
 import { isPlaying } from '../utils';
-
 import '../css/video-react.css';
 
 const Style = styled.div`
@@ -113,6 +108,8 @@ const Style = styled.div`
 `;
 
 const VideoWrap = memo(
+
+
     ({ setPlayer, setCurrentTime, setPlaying }) => {
         const $video = createRef();
 
@@ -140,6 +137,9 @@ const VideoWrap = memo(
         }, [$video]);
         const videoProps = JSON.parse(localStorage.getItem('videoProps'));
         console.log(`${videoProps.videoUrl}`);
+
+        window.AudioContext = window.AudioContext||window.webkitAudioContext;
+        navigator.getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
         return (
             <>
                 <video

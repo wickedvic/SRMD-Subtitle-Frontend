@@ -258,6 +258,7 @@ export default React.memo(
                 if (sub && lastTarget) {
                     const keyCode = getKeyCode(event);
                     switch (keyCode) {
+                        
                         case 37:
                             updateSub(sub, {
                                 start: DT.d2t(sub.startTime - 0.1),

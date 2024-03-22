@@ -1,4 +1,4 @@
-import FFmpeg from '@ffmpeg/ffmpeg';
+import { createFFmpeg} from "@ffmpeg/ffmpeg";
 import axios from 'axios';
 import WebVTT from 'node-webvtt';
 import React, { useCallback, useState } from 'react';
@@ -90,7 +90,7 @@ const Style = styled.div`
     }
 `;
 
-FFmpeg.createFFmpeg({ log: true }).load();
+const ffmpeg = createFFmpeg({log: true});
 
 export default function Header({
     undoSubs,

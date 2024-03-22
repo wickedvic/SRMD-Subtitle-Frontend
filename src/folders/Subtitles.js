@@ -9,6 +9,8 @@ import MergeIcon from '@mui/icons-material/Merge';
 import ChatIcon from '@mui/icons-material/Chat';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import { Button, Dialog, DialogActions, DialogContent } from '@mui/material';
+import DT from 'duration-time-conversion';
+
 
 
 import $ from 'jquery';
@@ -274,7 +276,6 @@ export default function Subtitles({
                         rowGetter={({ index }) => subtitle[index]}
                         headerRowRenderer={() => null}
                         rowRenderer={(props) => {
-                            console.log(props)
                             return (
                                 <div 
                                     key={props.key}
@@ -470,13 +471,14 @@ export default function Subtitles({
                                                         <input type='text' 
                                                              data-field="start"
                                                             onKeyDown={(e) => handleKeyDown(e, props.index, 'start')}
+                                                            //value={DT.t2d(props.rowData.start)}
                                                             value={props.rowData.start.replace('00:00:', '').replace('00:', '')} 
                                                             onChange={(event) => {
                                                                 updateSub(props.rowData, {
                                                                     start: event.target.value,                                                                    
                                                                 });
                                                             }}
-                                                        />
+                                                        />                                                        
                                                         <span>-</span> 
                                                         <input type='text' 
                                                             data-field="end"
