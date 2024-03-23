@@ -106,15 +106,9 @@ dist
 
 # build files 
 .build/
+.build/*.*
 
-
-build/static/js/main.8b225a67.js.map
-build/static/js/main.8b225a67.js.LICENSE.txt
-build/static/js/main.8b225a67.js
-build/static/js/651.0259a92f.chunk.js.map
-build/static/js/651.0259a92f.chunk.js
-build/static/css/main.8e7395a4.css.map
-build/static/css/main.8e7395a4.css
+build/static
 build/SRMD-Logo.png
 build/silence.mp3
 build/robots.txt

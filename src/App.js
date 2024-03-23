@@ -19,6 +19,8 @@ import Typography from '@mui/material/Typography';
 import Login from './components/Login';
 import Register from './components/Register';
 
+import EditableList from './folders/DetailsPage/Details';
+
 import 'core-js';
 import 'normalize.css';
 import { setLocale, setTranslations } from 'react-i18nify';
@@ -107,18 +109,12 @@ const App = () => {
                                     className="SRMD-img"
                                     src={'/SRMD-Logo.png'}
                                     alt="SRMD_Logo"
-                                ></img>
+                                />
                             </Typography>
                         </Toolbar>
                     </Container>
                 </AppBar>
-                <Backdrop
-                    sx={{
-                        color: '#FFF',
-                        zIndex: (theme) => theme.zIndex.drawer + 1,
-                    }}
-                    open={isLoading}
-                >
+                <Backdrop sx={{color: '#FFF',zIndex: (theme) => theme.zIndex.drawer + 1}} open={isLoading}>
                     <CircularProgress color="inherit" />
                 </Backdrop>
             </>
@@ -152,7 +148,7 @@ const App = () => {
                                             className="SRMD-img"
                                             src={'/SRMD-Logo.png'}
                                             alt="SRMD_Logo"
-                                        ></img>
+                                        />
                                     </Typography>
                                 </Toolbar>
                             </Container>
@@ -189,22 +185,20 @@ const App = () => {
                                             className="SRMD-img"
                                             src={'/SRMD-Logo.png'}
                                             alt="SRMD_Logo"
-                                        ></img>
+                                        />
                                     </Typography>
 
                                     <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                                         {pages.map((page) => (
-                                            <Button
-                                                key={page}
+                                            <Button key={page} 
                                                 onClick={(e) => {
                                                     handleCloseNavMenu(page);
                                                 }}
-                                                sx={{ my: 2, color: 'white', display: 'block' }}
-                                            >
-                                                {page}
-                                            </Button>
+                                                sx={{ my: 2, color: 'white', display: 'block' }}>{page}</Button>
                                         ))}
                                     </Box>
+
+                                    <span style={{ marginRight: '2%' }}>Version: {process.env.REACT_APP_VERSION}</span>
 
                                     <Box sx={{ flexGrow: 0 }}>
                                         <Tooltip title="Open settings">
@@ -212,8 +206,7 @@ const App = () => {
                                                 <Avatar src="/static/images/avatar/2.jpg" />
                                             </IconButton>
                                         </Tooltip>
-                                        <Menu
-                                            sx={{ mt: '45px' }}
+                                        <Menu sx={{mt:'45px'}}
                                             id="menu-appbar"
                                             anchorEl={anchorElUser}
                                             anchorOrigin={{
@@ -226,8 +219,7 @@ const App = () => {
                                                 horizontal: 'right',
                                             }}
                                             open={Boolean(anchorElUser)}
-                                            onClose={handleCloseUserMenu}
-                                        >
+                                            onClose={handleCloseUserMenu}>
                                             {settings.map((setting) => (
                                                 <MenuItem
                                                     key={setting}
@@ -252,6 +244,7 @@ const App = () => {
                             <Route exact path="/videos/edit" element={<VideoPlayerApp defaultLang={defaultLang} />} />
 
                             <Route exact path="/help" element={<Help />} />
+                            <Route exact path="/details" element={<EditableList />} />
 
                             <Route path="*" element={<Navigate to="/videos" />} />
                         </Routes>
@@ -259,6 +252,5 @@ const App = () => {
                 )}
             </Router>
         );
-};
-
+}
 export default App;

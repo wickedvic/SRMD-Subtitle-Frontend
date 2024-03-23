@@ -1,20 +1,20 @@
-import styled from 'styled-components';
-import languages from '../libs/languages';
-import { t, Translate } from 'react-i18nify';
-import React, { useState, useCallback } from 'react';
-import { download } from '../utils';
-import { sub2vtt, sub2srt, sub2txt } from '../libs/readSub';
-import sub2ass from '../libs/readSub/sub2ass';
-import googleTranslate from '../libs/googleTranslate';
-import FFmpeg from '@ffmpeg/ffmpeg';
-import WebVTT from 'node-webvtt';
+import { createFFmpeg} from "@ffmpeg/ffmpeg";
 import axios from 'axios';
+import WebVTT from 'node-webvtt';
+import React, { useCallback, useState } from 'react';
+import { t, Translate } from 'react-i18nify';
+import styled from 'styled-components';
 import Swal from 'sweetalert2';
+import googleTranslate from '../libs/googleTranslate';
+import languages from '../libs/languages';
+import { file2sub, sub2srt, sub2txt, sub2vtt } from '../libs/readSub';
+import sub2ass from '../libs/readSub/sub2ass';
+import { getExt, download } from '../utils';
 
+import { Checkbox } from '@mui/material';
+import Button from '@mui/material/Button';
 import Popover from '@mui/material/Popover';
 import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import { Checkbox } from '@mui/material';
 import { useEffect } from 'react';
 
 const Style = styled.div`
@@ -40,7 +40,7 @@ const Style = styled.div`
             justify-content: center;
             align-items: center;
             height: 35px;
-            width: 5%;
+            width: 4%;
             border-radius: 3px;
             color: #fff;
             cursor: pointer;
@@ -52,10 +52,45 @@ const Style = styled.div`
                 opacity: 1;
             }
         }
+
+        .import {
+            .btn {
+                position: relative;
+                opacity: 0.85;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 35px;
+                width: 100%;
+                border-radius: 3px;
+                color: #fff;
+                cursor: pointer;
+                font-size: 13px;
+                background-color: #3f51b5;
+                transition: all 0.2s ease 0s;
+                margin-right: 10px;
+                margin-left: 10px;
+
+                &:hover {
+                    opacity: 1;
+                }
+            }
+
+            .file {
+                position: absolute;
+                left: 0;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                width: 100%;
+                height: 100%;
+                opacity: 0;
+            }
+        }
     }
 `;
 
-FFmpeg.createFFmpeg({ log: true }).load();
+const ffmpeg = createFFmpeg({log: true});
 
 export default function Header({
     undoSubs,
@@ -75,6 +110,7 @@ export default function Header({
     bookmarked,
     subtitleComment,
 }) {
+    let userData = JSON.parse(localStorage.getItem('authUser'));
     const [anchorEl, setAnchorEl] = React.useState(null);
 
     const handleClick = (event) => {
@@ -93,8 +129,10 @@ export default function Header({
 
     const downloadSub = useCallback(
         (type) => {
+            const videoProps = JSON.parse(localStorage.getItem('videoProps'));
             let text = '';
-            const name = `${Date.now()}.${type}`;
+            const name = `${videoProps?.videoUrl?.split('video/')[1].split('.mp4')[0]}.${type}`;
+
             switch (type) {
                 case 'vtt':
                     text = sub2vtt(subtitle, viewEng);
@@ -119,6 +157,54 @@ export default function Header({
         },
         [subtitle, viewEng],
     );
+
+    const onSubtitleChange = useCallback(
+        (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const ext = getExt(file.name);
+                if (['ass', 'vtt', 'srt', 'json'].includes(ext)) {
+                    file2sub(file)
+                        .then((res) => {
+                            let timelineData = res.map(({ start, end, text }) => {
+                                return { start: start, end: end, text2: text };
+                            });
+
+                            let updatedTimelineData = res.map(({ start, end, text }) => {
+                                return { start: start, end: end, text: text };
+                            });
+
+                            var combinedArray = updatedTimelineData.map((obj, index) => ({
+                                ...obj,
+                                ...timelineData[index],
+                            }));
+
+                            let cleanedData = combinedArray.filter((res) => res.start !== res.end);
+
+                            clearSubs();
+
+                            setSubtitle(formatSub(cleanedData));
+                        })
+                        .catch((err) => {
+                            notify({
+                                message: err.message,
+                                level: 'error',
+                            });
+                        });
+                } else {
+                    notify({
+                        message: `${t('SUB_EXT_ERR')}: ${ext}`,
+                        level: 'error',
+                    });
+                }
+            }
+        },
+        [notify, setSubtitle, clearSubs, formatSub],
+    );
+
+    const onInputClick = useCallback((event) => {
+        event.target.value = '';
+    }, []);
 
     const onTranslate = useCallback(() => {
         window.localStorage.setItem('lang', JSON.stringify(tempTranslate));
@@ -188,7 +274,7 @@ export default function Header({
                     const modifiedSubtitleContentTrans = WebVTT.compile(parsedSubtitleTrans);
 
                     axios
-                        .put(`https://vaani.srmd.org/api/v1/videos/${videoProps.id}`, {
+                        .put(process.env.REACT_APP_API_URL + `/api/v1/videos/${videoProps.id}`, {
                             subtitleString: btoa(modifiedSubtitleContent),
                             metadataCheckFlag: bookmarked,
                             metadataComments: subtitleComment,
@@ -209,7 +295,7 @@ export default function Header({
                     const modifiedSubtitleContent = WebVTT.compile(parsedSubtitle);
 
                     axios
-                        .put(`https://vaani.srmd.org/api/v1/videos/${videoProps.id}`, {
+                        .put(process.env.REACT_APP_API_URL + `/api/v1/videos/${videoProps.id}`, {
                             subtitleString: btoa(modifiedSubtitleContent),
                             metadataCheckFlag: bookmarked,
                             metadataComments: subtitleComment,
@@ -288,6 +374,10 @@ export default function Header({
                                     <b>New Subtitle:</b> Drag on timeline
                                 </Typography>
                                 <Typography sx={{ p: 2 }}>
+                                    <b>Split Subtitle:</b> On actual video subtitle, click on subtitle, move where you
+                                    want to split with arrow keys and click split subtitle.
+                                </Typography>
+                                <Typography sx={{ p: 2 }}>
                                     <b>Delete Subtitle:</b> Trash icon or right click timeline subtitle
                                 </Typography>
                                 <Typography sx={{ p: 2 }}>
@@ -321,30 +411,37 @@ export default function Header({
                         )}
                     </div>
 
+                    {userData.email === 'Srmd.english@gmail.com' ? null : (
+                        <>
+                            <select
+                                style={{
+                                    width: '10%',
+                                    marginRight: '10px',
+                                    height: '35px',
+                                    minHeight: '35px',
+                                    marginLeft: 'auto',
+                                }}
+                                value={tempTranslate}
+                                onChange={(event) => setTempTranslate(event.target.value)}
+                            >
+                                {(languages[language] || languages.en).map((item) => (
+                                    <option key={item.key} value={item.key}>
+                                        {item.name}
+                                    </option>
+                                ))}
+                            </select>
+                            <div
+                                style={{ backgroundColor: '#673ab7', width: '7%' }}
+                                className="btn"
+                                onClick={onTranslate}
+                            >
+                                <Translate value="TRANSLATE" />
+                            </div>
+                        </>
+                    )}
                     <select
                         style={{
-                            width: '15%',
-                            marginRight: '10px',
-                            height: '35px',
-                            minHeight: '35px',
-                            marginLeft: 'auto',
-                        }}
-                        value={tempTranslate}
-                        onChange={(event) => setTempTranslate(event.target.value)}
-                    >
-                        {(languages[language] || languages.en).map((item) => (
-                            <option key={item.key} value={item.key}>
-                                {item.name}
-                            </option>
-                        ))}
-                    </select>
-                    <div style={{ backgroundColor: '#673ab7', width: '10%' }} className="btn" onClick={onTranslate}>
-                        <Translate value="TRANSLATE" />
-                    </div>
-
-                    <select
-                        style={{
-                            width: '15%',
+                            width: '10%',
                             marginRight: '10px',
                             height: '35px',
                             minHeight: '35px',
@@ -363,7 +460,7 @@ export default function Header({
                     </select>
 
                     <div
-                        style={{ backgroundColor: '#673ab7', width: '10%' }}
+                        style={{ backgroundColor: '#673ab7', width: '7%' }}
                         className="btn"
                         onClick={(e) => {
                             if (exportValue === 'SRT') {
@@ -378,6 +475,20 @@ export default function Header({
                         }}
                     >
                         <Translate value="Export" />
+                    </div>
+
+                    {/* <div className="import">
+                        <div className="btn">
+                            <Translate value="OPEN_SUB" />
+                            <input className="file" type="file" onChange={onSubtitleChange} onClick={onInputClick} />
+                        </div>
+                    </div> */}
+
+                    <div className="import">
+                        <div className="btn">
+                            <Translate value="OPEN_SUB" />
+                            <input className="file" type="file" onChange={onSubtitleChange} onClick={onInputClick} />
+                        </div>
                     </div>
 
                     <div
@@ -454,14 +565,17 @@ export default function Header({
                                             const modifiedSubtitleContentTrans = WebVTT.compile(parsedSubtitleTrans);
 
                                             axios
-                                                .put(`https://vaani.srmd.org/api/v1/videos/${videoProps.id}`, {
-                                                    subtitleString: btoa(modifiedSubtitleContent),
-                                                    metadataCheckFlag: bookmarked,
-                                                    metadataComments: subtitleComment,
-                                                    translatedString: btoa(
-                                                        encodeURIComponent(modifiedSubtitleContentTrans),
-                                                    ),
-                                                })
+                                                .put(
+                                                    process.env.REACT_APP_API_URL + `/api/v1/videos/${videoProps.id}`,
+                                                    {
+                                                        subtitleString: btoa(modifiedSubtitleContent),
+                                                        metadataCheckFlag: bookmarked,
+                                                        metadataComments: subtitleComment,
+                                                        translatedString: btoa(
+                                                            encodeURIComponent(modifiedSubtitleContentTrans),
+                                                        ),
+                                                    },
+                                                )
                                                 .then(function (response) {
                                                     setLoading('');
 
@@ -477,8 +591,6 @@ export default function Header({
                                                                 'videoProps',
                                                                 JSON.stringify(response.data),
                                                             );
-
-                                                            window.location.reload();
                                                         }
                                                     });
                                                 })
@@ -500,11 +612,14 @@ export default function Header({
                                             const modifiedSubtitleContent = WebVTT.compile(parsedSubtitle);
 
                                             axios
-                                                .put(`https://vaani.srmd.org/api/v1/videos/${videoProps.id}`, {
-                                                    subtitleString: btoa(modifiedSubtitleContent),
-                                                    metadataCheckFlag: bookmarked,
-                                                    metadataComments: subtitleComment,
-                                                })
+                                                .put(
+                                                    process.env.REACT_APP_API_URL + `/api/v1/videos/${videoProps.id}`,
+                                                    {
+                                                        subtitleString: btoa(modifiedSubtitleContent),
+                                                        metadataCheckFlag: bookmarked,
+                                                        metadataComments: subtitleComment,
+                                                    },
+                                                )
                                                 .then(function (response) {
                                                     setLoading('');
 
@@ -520,8 +635,6 @@ export default function Header({
                                                                 'videoProps',
                                                                 JSON.stringify(response.data),
                                                             );
-
-                                                            window.location.reload();
                                                         }
                                                     });
                                                 })

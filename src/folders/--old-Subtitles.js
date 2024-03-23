@@ -1,6 +1,5 @@
 import styled from 'styled-components';
-import React, { useState,useEffect, useCallback, useRef } from 'react';
-
+import React, { useState, useCallback, useEffect } from 'react';
 import { Table } from 'react-virtualized';
 import unescape from 'lodash/unescape';
 import debounce from 'lodash/debounce';
@@ -9,11 +8,9 @@ import MergeIcon from '@mui/icons-material/Merge';
 import ChatIcon from '@mui/icons-material/Chat';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import { Button, Dialog, DialogActions, DialogContent } from '@mui/material';
-import DT from 'duration-time-conversion';
+import DraftEditor from '../components/DraftEditor';
+import { EditorState } from 'draft-js';
 
-
-
-import $ from 'jquery';
 
 const Style = styled.div`
     position: relative;
@@ -23,25 +20,6 @@ const Style = styled.div`
     .ReactVirtualized__Table {
         .ReactVirtualized__Table__Grid {
             outline: none;
-        }
-
-        .imputs input {
-            width: 100% !important;
-            display: block !important;
-            background: transparent !important;
-            border: medium !important;
-            color: rgb(255, 255, 255) !important;
-            text-align: center;
-        }
-        .textarea.imputs * {
-            line-height: normal;
-            display: block;
-        }
-        .imputs {
-            display: block !important;
-            overflow: hidden;
-            overflow-y: auto;
-            width: 220px !important;
         }
 
         .public-DraftStyleDefault-block span {
@@ -117,7 +95,6 @@ const Style = styled.div`
 export default function Subtitles({
     currentIndex,
     subtitle,
-    setSubtitle,
     checkSub,
     player,
     updateSub,
@@ -132,14 +109,13 @@ export default function Subtitles({
     setSubtitleComment,
     numEditors,
 }) {
-    
-    //const stateStack = useRef([]);
-
     const [height, setHeight] = useState(100);
 
     const [anchorIndex, setAnchorIndex] = useState(null);
 
     const [open, setOpen] = React.useState(false);
+
+    const [items, setItems] = useState([]);
 
     const handleClose = () => {
         setOpen(false);
@@ -149,102 +125,51 @@ export default function Subtitles({
         setHeight(document.body.clientHeight - 170);
     }, [setHeight]);
 
-    useEffect(() => 
-    {
+    useEffect(() => {
         resize();
         if (!resize.init) {
             resize.init = true;
             const debounceResize = debounce(resize, 500);
             window.addEventListener('resize', debounceResize);
         }
+
         
+        setItems(subtitle);
 
-        $('#editable-list').on('keydown', '.itemsalist textarea', function(e) {
-       
-            var curentnode = $(this).parent().parent();
-            var nextnode = $(this).parent().parent().next();
-            var prevnode = $(this).parent().parent().prev();
-            
-            if (e.keyCode===40) {
-                    $('.itemsalist .textarea').removeClass('highlight');
-                    nextnode.find('.textarea').addClass('highlight');
-                    nextnode.find('textarea[data-field="text2"]').focus();
-                    nextnode.find('textarea[data-field="text2"]').click();               
-            }
 
-            if (e.keyCode===38) {
-                if ($(curentnode).hasClass("item_1")) 
-                {
-                }
-                else 
-                {
-                    $('.itemsalist .textarea').removeClass('highlight');
-                    prevnode.find('.textarea').addClass('highlight');
-                    prevnode.find('textarea[data-field="text2"]').focus();
-                    prevnode.find('textarea[data-field="text2"]').click();
-                }
-            }
-        });
-
-        // $('#editable-list').on('click', '.itemsalist .textarea', function(e) 
-        // {
-        //     var curentnode = $(this).parent().parent();            
-        //     $('.itemsalist .textarea').removeClass('highlight');
-        //     curentnode.find('.textarea').addClass('highlight');
-        // });
-
-    }, [resize, subtitle]);
+    }, [resize]);
     const videoProps = JSON.parse(localStorage.getItem('videoProps'));
 
-    const handleKeyDown = (e, index, field) => 
-    {
-        if (e.shiftKey && e.key === 'Enter') {
-            e.preventDefault();
-  
-            if(field==='text' || field==='text2')
-            {
-  
-            const text = e.target.value;
-            const caretOffset = e.target.selectionStart;
-            const newTextBefore = text.substring(0, caretOffset).trim();
-            const newTextAfter = text.substring(caretOffset).trim();
-            const newItems = [
-                ...subtitle.slice(0, index),
-                { ...subtitle[index], ['text']: newTextBefore, ['text2']: newTextBefore },
-                { ...subtitle[index], ['text']: newTextAfter, ['text2']: newTextAfter },
-                ...subtitle.slice(index + 1)
-            ];
-            setSubtitle(newItems);
-            //stateStack.current.push(newItems);
-          }
-        }
-    };
-  
-    const handleChangeText = (e, index, field) => 
-    {
-        const text = e.target.value;
-        const newItems = [...subtitle];
-        if(field==='text' || field==='text2')
-        {
-          newItems[index] = { ...newItems[index], text: text,  text2: text };
-        }
-  
-        if(field==='start')
-        {
-          newItems[index] = { ...newItems[index], start: text};
-        }
-  
-        if(field==='end')
-        {
-          newItems[index] = { ...newItems[index], end: text};
-        }
-        setSubtitle(newItems);
+
+    const [editors, setEditors] = useState(Array.from({ length: numEditors }, () => EditorState.createEmpty()));
+
+    const handleShiftEnter = (index) => {
+        // Split into a new editor
+        const newEditors = [...editors];
+        newEditors.splice(index + 1, 0, EditorState.createEmpty());
+        setEditors(newEditors);
     };
 
+    const handleKeyDown = (event, index) => {
+        if (event.key === 'Enter' && event.shiftKey) {
+          // If Shift + Enter is pressed, split the content into a new list item
+          event.preventDefault();
+          const newItems = [...items];
+          newItems.splice(index + 1, 0, '');
+          setItems(newItems);
+        }
+      };
     
+      const handleChange = (event, index) => {
+        const newItems = [...items];
+        newItems[index] = event.target.value;
+        setItems(newItems);
+      };
 
     return (
         <>
+
+
             <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
                     {window.localStorage.getItem('lang') === null &&
@@ -266,28 +191,26 @@ export default function Subtitles({
                     )}
                 </div>
                 <Style className="subtitles">
-                    <Table id='editable-list'
+                    <Table
                         headerHeight={20}
                         width={750}
                         height={height}
                         rowHeight={100}
                         scrollToIndex={currentIndex}
-                        rowCount={subtitle.length}
-                        rowGetter={({ index }) => subtitle[index]}
+                        rowCount={items.length}
+                        rowGetter={({ index }) => items[index]}
                         headerRowRenderer={() => null}
                         rowRenderer={(props) => {
                             return (
-                                <div 
+                                <div
                                     key={props.key}
-                                    className={`${props.className} itemsalist item_${props.index+1}`}
+                                    className={props.className}
                                     style={props.style}
                                     onClick={() => {
                                         if (!open) {
                                             if (player) {
                                                 player.play();
-                                                //player.pause();
-                                                if (player.duration >= props.rowData.startTime) 
-                                                {
+                                                if (player.duration >= props.rowData.startTime) {
                                                     player.currentTime = props.rowData.startTime + 0.001;
                                                 }
                                             }
@@ -315,6 +238,7 @@ export default function Subtitles({
                                                 }}
                                                 onClick={(event) => {
                                                     setOpen(true);
+
                                                     setAnchorIndex(props.index);
                                                 }}
                                             />
@@ -426,75 +350,7 @@ export default function Subtitles({
                                             />
                                         </div>
 
-                                        <div className={[
-                                                'textarea imputs',
-                                                currentIndex === props.index ? 'highlight' : '',
-                                                checkSub(props.rowData) ? 'illegal' : '',
-
-                                                viewEng &&
-                                                ((props?.rowData?.text?.length / props?.rowData?.duration).toFixed(0) >
-                                                    28 ||
-                                                    props?.rowData?.text?.split('\n')?.map((e) => e.length) > 55)
-                                                    ? 'cplOrange'
-                                                    : '',
-
-                                                !viewEng &&
-                                                ((props?.rowData?.text2?.length / props?.rowData?.duration).toFixed(0) >
-                                                    28 ||
-                                                    props?.rowData?.text2?.split('\n')?.map((e) => e.length) > 55)
-                                                    ? 'cplOrange'
-                                                    : '',
-
-                                                viewEng &&
-                                                ((props?.rowData?.text?.length / props?.rowData?.duration).toFixed(0) >
-                                                    24 ||
-                                                    props?.rowData?.text?.split('\n')?.map((e) => e.length) > 45)
-                                                    ? 'cplYellow'
-                                                    : '',
-
-                                                !viewEng &&
-                                                ((props?.rowData?.text2?.length / props?.rowData?.duration).toFixed(0) >
-                                                    24 ||
-                                                    props?.rowData?.text2?.split('\n')?.map((e) => e.length) > 45)
-                                                    ? 'cplYellow'
-                                                    : '',
-                                            ]
-                                                .join(' ')
-                                                .trim()}
-                                                style={{
-                                                width: '150px',
-                                                textAlign: 'center',
-                                                paddingTop: '5px',
-                                                fontSize: '12px',
-                                            }}
-                                                >
-                                                        <input type='text' 
-                                                             data-field="start"
-                                                            onKeyDown={(e) => handleKeyDown(e, props.index, 'start')}
-                                                            //value={DT.t2d(props.rowData.start)}
-                                                            value={props.rowData.start.replace('00:00:', '').replace('00:', '')} 
-                                                            onChange={(event) => {
-                                                                updateSub(props.rowData, {
-                                                                    start: event.target.value,                                                                    
-                                                                });
-                                                            }}
-                                                        />                                                        
-                                                        <span>-</span> 
-                                                        <input type='text' 
-                                                            data-field="end"
-                                                            onKeyDown={(e) => handleKeyDown(e, props.index, 'end')}
-                                                            value={props.rowData.end.replace('00:00:', '').replace('00:', '')} 
-                                                            onChange={(event) => {
-                                                                updateSub(props.rowData, {
-                                                                    end: event.target.value,                                                                    
-                                                                });
-                                                            }}
-                                                        />
-                                                        <span>seconds</span>
-                                                    </div>
-                                               
-
-                                        {/* <textarea
+                                        <textarea
                                             disabled={true}
                                             style={{
                                                 width: '150px',
@@ -539,8 +395,6 @@ export default function Subtitles({
                                                 .join(' ')
                                                 .trim()}
                                             value={
-                                                props?.rowData?.startTime === undefined ||
-                                                props?.rowData?.endTime === undefined ||
                                                 props?.rowData?.text === undefined ||
                                                 props?.rowData?.text2 === undefined
                                                     ? `0/0`
@@ -560,40 +414,71 @@ export default function Subtitles({
                                                           ?.split('\n')
                                                           ?.map((e) => e.length)}`
                                             }
-                                        /> */}
+                                            // onChange={(event) => {
+                                            //     updateSub(props.rowData, {
+                                            //         text: event.target.value,
+                                            //     });
+                                            // }}
+                                        />
 
                                         {window.localStorage.getItem('lang') === null &&
                                         (videoProps.translatedString === null ||
                                             videoProps.translatedString === 'null' ||
                                             videoProps.translatedString === ' ' ||
                                             videoProps.translatedString === '') ? null : (
+                                                <div className={[
+                                                'textarea',
+                                                currentIndex === props.index ? 'highlight' : '',
+                                                checkSub(props.rowData) ? 'illegal' : '',
+                                            ]
+                                                .join(' ')
+                                                .trim()}>
+                                            <DraftEditor style={{
+                                                fontSize: '16px',
+                                            }} initialContent={unescape(props.rowData.text)}
 
-                                            <textarea style={{fontSize: '16px',}}
-                                            spellCheck="true"
-                                            className={['textarea',currentIndex === props.index ? 'highlight' : '',checkSub(props.rowData) ? 'illegal' : '',].join(' ').trim()}
-                                        
-                                            onKeyDown={(e) => handleKeyDown(e, props.index, 'text')}
-                                            data-field="text"
-                                            value={unescape(props.rowData.text)}
-                                            onChange={(event) => {
-                                                updateSub(props.rowData, {
-                                                    text: event.target.value,
-                                                    text2: event.target.value,
-                                                });
-                                            }}
-                                        /> 
+                                            onChange={(newEditorState) => updateSub(props.rowData, {text2: newEditorState})}
+                                            onKeyDown={(e) => handleKeyDown(e, props.rowData.index)}    
+                                            />
+
+                                            {/* <textarea
+                                                style={{
+                                                    fontSize: '16px',
+                                                }}
+                                                spellcheck="true"
+                                                className={[
+                                                    'textarea',
+                                                    currentIndex === props.index ? 'highlight' : '',
+                                                    checkSub(props.rowData) ? 'illegal' : '',
+                                                ]
+                                                    .join(' ')
+                                                    .trim()}
+                                                value={unescape(props.rowData.text)}
+                                                onChange={(event) => {
+                                                    updateSub(props.rowData, {
+                                                        text: event.target.value,
+                                                    });
+                                                }}
+                                            /> */}
+                                            </div>
                                         )}
-                                            
-                                         <textarea style={{fontSize: '16px',}}
-                                            spellCheck="true"
-                                            className={['textarea',currentIndex === props.index ? 'highlight' : '',checkSub(props.rowData) ? 'illegal' : '',].join(' ').trim()}
-
-                                            onKeyDown={(e) => handleKeyDown(e, props.index, 'text2')}
-                                            data-field="text2"
+                                        
+                                        <textarea
+                                            style={{
+                                                fontSize: '16px',
+                                            }}
+                                            spellcheck="true"
+                                            className={[
+                                                'textarea',
+                                                currentIndex === props.index ? 'highlight' : '',
+                                                checkSub(props.rowData) ? 'illegal' : '',
+                                            ]
+                                                .join(' ')
+                                                .trim()}
                                             value={unescape(props.rowData.text2)}
+                                            onKeyDown={(e) => handleKeyDown(e, props.rowData.index)}
                                             onChange={(event) => {
                                                 updateSub(props.rowData, {
-                                                    text: event.target.value,
                                                     text2: event.target.value,
                                                 });
                                             }}
@@ -604,6 +489,9 @@ export default function Subtitles({
                         }}
                     ></Table>
                 </Style>
+
+
+                
             </div>
         </>
     );

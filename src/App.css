@@ -33,3 +33,17 @@
 }
 
 
+.historyButton {
+  background:none!important;
+   border:none; 
+   padding:0!important;
+  margin-left: 0.5%;
+ 
+  /*optional*/
+  font-family:arial,sans-serif; /*input has OS specific font-family*/
+   color:#4d4d4d;
+   cursor:pointer;
+}
+.historyButton:hover{
+  color:#069;
+}

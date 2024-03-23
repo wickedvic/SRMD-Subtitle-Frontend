@@ -1,10 +1,9 @@
 import React, { useState, useEffect, createRef, useCallback, useMemo, memo } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
 import { Translate } from 'react-i18nify';
-
 import styled from 'styled-components';
-
 import { isPlaying } from '../utils';
+import '../css/video-react.css';
 
 const Style = styled.div`
     display: flex;
@@ -109,6 +108,8 @@ const Style = styled.div`
 `;
 
 const VideoWrap = memo(
+
+
     ({ setPlayer, setCurrentTime, setPlaying }) => {
         const $video = createRef();
 
@@ -128,16 +129,21 @@ const VideoWrap = memo(
         const onClick = useCallback(() => {
             if ($video.current) {
                 if (isPlaying($video.current)) {
-                    $video.current.pause();
+                    $video.current.play();
                 } else {
                     $video.current.play();
                 }
             }
         }, [$video]);
         const videoProps = JSON.parse(localStorage.getItem('videoProps'));
+        console.log(`${videoProps.videoUrl}`);
+
+        window.AudioContext = window.AudioContext||window.webkitAudioContext;
+        navigator.getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
         return (
             <>
                 <video
+                    crossOrigin="anonymous"
                     id="videoPlayer"
                     className="videoPlayer"
                     onClick={onClick}
@@ -145,13 +151,17 @@ const VideoWrap = memo(
                     ref={$video}
                     controls
                 ></video>
+
+                {/* <Player id="videoPlayer" className="videoPlayer" onClick={onClick} >
+                    <source src={`${videoProps.videoUrl}`}/>
+                </Player> */}
             </>
         );
     },
     () => true,
 );
 
-export default function Player(props) {
+export default function Players(props) {
     const [currentSub, setCurrentSub] = useState(null);
     const [focusing, setFocusing] = useState(false);
     const [inputItemCursor, setInputItemCursor] = useState(0);

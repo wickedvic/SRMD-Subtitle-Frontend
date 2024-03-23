@@ -258,6 +258,7 @@ export default React.memo(
                 if (sub && lastTarget) {
                     const keyCode = getKeyCode(event);
                     switch (keyCode) {
+                        
                         case 37:
                             updateSub(sub, {
                                 start: DT.d2t(sub.startTime - 0.1),
@@ -313,12 +314,12 @@ export default React.memo(
                                     left: render.padding * gridGap + (sub.startTime - render.beginTime) * gridGap * 10,
                                     width: (sub.endTime - sub.startTime) * gridGap * 10,
                                 }}
-                                onClick={() => {
+                                onDoubleClick={() => {
                                     if (player.duration >= sub.startTime) {
                                         player.currentTime = sub.startTime + 0.001;
                                     }
                                 }}
-                                onDoubleClick={(event) => onDoubleClick(sub, event)}
+                                // onDoubleClick={(event) => onDoubleClick(sub, event)}
                             >
                                 <ContextMenuTrigger id="contextmenu" holdToDisplay={-1}>
                                     <div
