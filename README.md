@@ -1,7 +1,7 @@
 # SRMD_SEVA
 # subtitle-editor-srmd-frontend
 
-VIDEO EDITOR APPLICATION USED FOR https://www.srmd.org/en-US/
+VIDEO EDITOR APPLICATION USED FOR SRMD
 
 1. npm install
 2. npm start
